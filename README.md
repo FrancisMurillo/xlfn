@@ -7,9 +7,9 @@ After working for some time in an limited Windows environment without Python or 
 
 ### Introduction
 
-Since VBA doesn't have lambdas or closure or the first class functions, you can't declare function variables. A little cheap but the other workaround for this is that you can declare String variables that contain the function name you want to invoke, so this is the route this library takes. This is done by **Application.Run** which serious flaws. One serious weak point is that functions invoked by Application.Run cannot return value. So how do we go about the return mechanism? Cheap but it can be done by declaring a global variable as the return holder and returning this value after the function invokation which is defined here as Fn.Result. 
+Since VBA doesn't have lambdas or closure or the first class functions, you can't declare function variables. A little cheap but the other workaround for this is that you can declare String variables that contain the function name you want to invoke, so this is the route this library takes. This is done by **Application.Run** which serious flaws. One serious weak point is that functions invoked by **Application.Run** cannot return value. So how do we go about the return mechanism? Cheap but it can be done by declaring a global variable as the return holder and returning this value after the function invokation which is defined here as **Fn.Result**. 
 
-So in short, we have to refit our functions so that they can be "invokable" by Application.Run. Take this simple sample addition function in the module MyModule.
+So in short, we have to refit our functions so that they can be "invokable" by **Application.Run**. Take this simple sample addition function in the module **MyModule**.
 
 ```VB.net
 Public Function Add(A As Long, B as Long) as Long
@@ -33,7 +33,7 @@ Not much of a difference except the return mechanism and the function header wit
   Debug.Print Fn.InvokeTwoArgs("MyModule.Add_", 1, 2)
 ```
 
-Note the way functions are invoked using their full name([Module Name].[Method Name]) and how the arguments are wrapped in the Array() function, a little cumbersome but a necessary evil since you can't call the functions straight. Now with this function mechanism, the core functional method Filter, Reduce and Map is now fully available at our disposal as seen here.
+Note the way functions are invoked using their full name([Module Name].[Method Name]) and how the arguments are wrapped in the **Array()** function, a little cumbersome but a necessary evil since you can't call the functions straight. Now with this function mechanism, the core functional method Filter, Reduce and Map is now fully available at our disposal as seen here.
 
 ```VB.net
 Public Sub IsOdd_(Val as Long) 
@@ -74,7 +74,7 @@ Public Sub FilteringWithoutFP()
 End Sub
 ```
 
-Compare the code, without using FP there would be some boilerplate just to filter a simple array although it can be still shortened. The mechanism of lambdas here are somewhat cumbersome but with the ability of Map, Filter and Reduce at the ready, it's a small price to pay for these three functional functions. There are others such as ZipWith, Sort, and so on just to make this worthwhile.
+Compare the code, without using FP there would be some boilerplate just to filter a simple array although it can be still shortened. The mechanism of lambdas here are somewhat cumbersome but with the ability of **Map**, **Filter** and **Reduce** at the ready, it's a small price to pay for these three functional functions. There are others such as **ZipWith**, **Sort**, and so on just to make this worthwhile.
 
 Just a word of warning, these functions might run slower than the longer versions since there is the overhead of Application.Run as well as the transfer mechanisms involved although Python can get the same flak. But if performance is not an issue, then this library is good for you and your sanity.
 
