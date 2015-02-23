@@ -10,7 +10,10 @@ Attribute VB_Name = "FnFunction"
 
 Public Const METHOD_PREFIX As String = "FnFunction."
 
-Public Const Identity As String = METHOD_PREFIX & "Identity_"
+Public Const Identity_Fn As String = METHOD_PREFIX & "Identity_"
+Public Const Not_Fn As String = METHOD_PREFIX & "Not_"
+Public Const Reciprocal_Fn As String = METHOD_PREFIX & "Reciprocal_"
+Public Const Negative_Fn As String = METHOD_PREFIX & "Negative_"
 
 ' ## Generic Functions
 '

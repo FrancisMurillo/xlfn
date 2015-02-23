@@ -185,7 +185,7 @@ End Function
 
 '# Just a function to easily test the installation of Fn
 Public Sub Hello()
-    Debug.Print Fn.InvokeOneArg(FnFunction.Identity, "Hello Fn: The Pseudo Functional Programming Library for VBA")
+    Debug.Print Fn.InvokeOneArg(FnFunction.Identity_Fn, "Hello Fn: The Pseudo Functional Programming Library for VBA")
 End Sub
 
 ' ## Combinator Functions
@@ -194,30 +194,42 @@ End Sub
 
 '# Curries functions, returns the buffer name to be used by invoke
 Public Function Curry(MethodName As String, PreArgs As Variant) As String
-    Dim BIndex As Long
-    FnBuffer.InitializeBuffers
-    BIndex = FnBuffer.GetNextBufferIndex()
-    FnBuffer.SetBuffer Array( _
-        BuildBufferName(FnBuffer.CURRY_METHOD), MethodName, PreArgs), _
-        BIndex
-    Curry = BuildBufferName(BUFFER_PREFIX) & BIndex
+    Curry = GenerateBufferDefinition(FnBuffer.CURRY_METHOD, MethodName, PreArgs)
 End Function
 
 '# Combines several functions together, think of function composition here
 Public Function Compose(MethodNames As Variant) As String
-    If ArrayUtil.IsEmptyArray(MethodNames) Then _
-        Err.Raise vbObjectError + ERR_OFFSET, ERR_SOURCE, "Fn.Compose is given an empty method names"
+    Compose = GenerateBufferDefinition(FnBuffer.COMPOSE_METHOD, MethodNames, Empty)
+End Function
 
+'# This is similar to curry but this functions more as a closure or a deferred executor
+'# This function accepts a method name given predefined arguments
+'# Primarily used to Map array of functions given arguments
+'# This gives you the ability to put the function name as the parameter
+Public Function Reinvoke(Args As Variant)
+    Reinvoke = GenerateBufferDefinition(FnBuffer.REINVOKE_METHOD, Empty, Args)
+End Function
+
+'# Wraps a function to accept an argument array instead of a plain argument
+'# This is used basically wrapped multiple arguments to one, quite hard to explain
+Public Function Lambda(MethodName As Variant)
+    Lambda = GenerateBufferDefinition(FnBuffer.LAMBDA_METHOD, MethodName, Empty)
+End Function
+
+'# Builds the definition of the buffer
+Private Function GenerateBufferDefinition(BufferMethodName As String, MethodName As Variant, BufferArgs As Variant) As String
     Dim BIndex As Long
     FnBuffer.InitializeBuffers
     BIndex = FnBuffer.GetNextBufferIndex()
     FnBuffer.SetBuffer Array( _
-        BUFFER_MODULE & "." & FnBuffer.COMPOSE_METHOD, MethodNames, Empty), _
+        BuildBufferName(BufferMethodName), MethodName, BufferArgs), _
         BIndex
-    Compose = BUFFER_MODULE & "." & FnBuffer.BUFFER_PREFIX & BIndex
+    GenerateBufferDefinition = BuildBufferName(BUFFER_PREFIX) & BIndex
 End Function
 
 '# Builds the full buffer module function name for use given the module and method
 Private Function BuildBufferName(MethodName As String) As String
     BuildBufferName = BUFFER_MODULE & "." & MethodName
 End Function
+
+

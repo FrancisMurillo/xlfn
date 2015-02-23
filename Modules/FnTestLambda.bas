@@ -79,3 +79,8 @@ End Sub
 Public Sub ToUppercase_(Val As String)
     Fn.Result = UCase(Val)
 End Sub
+
+'# Operator and arguments
+Public Sub OperatorApply_(LVal As Variant, RVal As Variant, OperatorName As String)
+    Fn.Result = Fn.InvokeTwoArg(OperatorName, LVal, RVal)
+End Sub

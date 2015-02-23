@@ -50,7 +50,42 @@ Public Sub TestCompose()
     VaseAssert.AssertEqual _
         Fn.InvokeOneArg(ToUpperAndRemove_Fn, "Francis"), _
         "FRNCS"
-    
-    Ping_
 End Sub
 
+Public Sub TestReinvoke()
+    Dim WithTwoAndThree As String
+    WithTwoAndThree = Fn.Reinvoke(Array(2, 3))
+    
+    VaseAssert.AssertEqual _
+        Fn.InvokeOneArg(WithTwoAndThree, "FnOperator.Add_"), _
+        5
+    VaseAssert.AssertEqual _
+        Fn.InvokeOneArg(WithTwoAndThree, "FnOperator.Multiply_"), _
+        6
+        
+    VaseAssert.AssertArraysEqual _
+        FnArrayUtil.Map_(WithTwoAndThree, _
+            Array("FnOperator.Add_", "FnOperator.Multiply_")), _
+        Array(5, 6)
+End Sub
+
+Public Sub TestLambda()
+    VaseAssert.AssertArraysEqual _
+        FnArrayUtil.Map_(FnFunction.Negative_Fn, ArrayUtil.Range(0, 5)), _
+        ArrayUtil.Reverse(ArrayUtil.Range(-4, 1))
+    
+    ' Not just FnOperator.Add_Fn
+    VaseAssert.AssertArraysEqual _
+        FnArrayUtil.Map_(Fn.Lambda(FnOperator.Add_Fn), Array( _
+            Array(1, 2), _
+            Array(2, 3), _
+            Array(3, 4))), _
+        Array(3, 5, 7)
+    VaseAssert.AssertArraysEqual _
+        FnArrayUtil.Map_(Fn.Lambda("FnTestLambda.OperatorApply_"), Array( _
+            Array(1, 2, FnOperator.Add_Fn), _
+            Array(2, 3, FnOperator.Multiply_Fn), _
+            Array(3, 4, Fn.Compose(Array( _
+                FnFunction.Negative_Fn, FnOperator.Add_Fn))))), _
+        Array(3, 6, -7)
+End Sub

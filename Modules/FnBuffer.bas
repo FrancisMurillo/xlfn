@@ -19,6 +19,8 @@ Public Const BUFFER_PREFIX As String = "Buffer_"
 
 Public Const CURRY_METHOD As String = "Curry_"
 Public Const COMPOSE_METHOD As String = "Compose_"
+Public Const REINVOKE_METHOD As String = "Reinvoke_"
+Public Const LAMBDA_METHOD As String = "Lambda_"
 
 Private gIsBufferReady As Boolean
 Private gBufferIndex As Long
@@ -30,6 +32,16 @@ Public Function GetNextBufferIndex() As Long
     gBufferIndex = gBufferIndex + 1
     If gBufferIndex >= BUFFER_COUNT Then _
         gBufferIndex = gBufferIndex - BUFFER_COUNT
+End Function
+
+'# Moves the buffer one step back
+'# This is an advanced function to prevent the buffer from being overloaded
+'# Not to be used unless understood
+Public Function ReleaseCurrentBuffer()
+    gBufferArgs(gBufferIndex) = Array()
+    gBufferIndex = gBufferIndex - 1
+    If gBufferIndex < 0 Then _
+        gBufferIndex = BUFFER_COUNT - 1
 End Function
 
 ' ## Functional Interfaces
@@ -58,6 +70,23 @@ Public Sub Compose_(Args As Variant)
     Next
     Fn.Result = AccRes
 End Sub
+
+'# (Re)invokes a function with predefined arguments
+Public Sub Reinvoke_(Args As Variant)
+    Dim MethodName As String, PreArgs As Variant
+    MethodName = Args(2)(0)
+    PreArgs = Args(1)
+    
+    Fn.Result = Fn.Invoke(MethodName, PreArgs)
+End Sub
+
+'# Turns a function to an one argument function
+Public Function Lambda_(Args As Variant)
+    Dim MethodName As String, PreArgs As Variant, CurArgs As Variant
+    MethodName = Args(0)
+    CurArgs = Args(2)(0)
+    Fn.Result = Fn.Invoke(MethodName, CurArgs)
+End Function
 
 ' ## Function Buffers CRUD
 '
@@ -179,4 +208,6 @@ Private Sub Buffer_9(Optional Args As Variant = Empty)
         Args = ArrayUtil.CreateEmptyArray()
     Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args))
 End Sub
+
+
 

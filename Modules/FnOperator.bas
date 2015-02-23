@@ -9,6 +9,16 @@ Attribute VB_Name = "FnOperator"
 ' Just be wary of converting the values since you might not get the expected type
 ' But since we're using variant, this might hold little value
 
+' ## Function Constants
+'
+' These constants are to aid typing with the intellisense
+
+Public Const METHOD_PREFIX As String = "FnOperator."
+
+Public Const Add_Fn As String = METHOD_PREFIX & "Add_"
+Public Const Multiply_Fn As String = METHOD_PREFIX & "Multiply_"
+
+
 ' ## Mathematical Operators
 '
 ' Math operators
