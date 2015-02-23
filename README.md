@@ -84,10 +84,11 @@ This is a <a href="https://github.com/FrancisMurillo/xlchip">chip</a> project, s
 
 1. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/Fn.bas">Fn.bas</a>
 2. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnBuffer.bas">FnBuffer.bas</a>
-3. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnArrayUtil.bas">FnArrayUtil.bas</a>
-4. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnPredicate.bas">FnPredicate.bas</a>
-5. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnFunction.bas">FnFunction.bas</a>
-6. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnOperator.bas">FnOperator.bas</a>
+3. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnUtil.bas">FnUtil.bas</a>
+4. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnArrayUtil.bas">FnArrayUtil.bas</a>
+5. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnPredicate.bas">FnPredicate.bas</a>
+6. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnFunction.bas">FnFunction.bas</a>
+7. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnOperator.bas">FnOperator.bas</a>
 
 And include in your project references the following.
 
