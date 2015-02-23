@@ -114,6 +114,9 @@ End Sub
 Public Sub SetBuffer(Args As Variant, Index As Long)
     gBufferArgs(Index) = Args
 End Sub
+Public Sub SetClosureBufferArgs(BufferArgs As Variant, Index As Long)
+    gBufferArgs(Index)(3) = BufferArgs
+End Sub
 
 ' ## The Function Buffers
 '
@@ -125,7 +128,7 @@ Private Sub Buffer_0(Optional Args As Variant = Empty)
     BufferArgs = gBufferArgs(0)
     If IsMissing(Args) Then _
         Args = ArrayUtil.CreateEmptyArray()
-    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args))
+    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args, BufferArgs(3), BufferArgs(4)))
 End Sub
 
 Private Sub Buffer_1(Optional Args As Variant = Empty)
@@ -134,7 +137,7 @@ Private Sub Buffer_1(Optional Args As Variant = Empty)
     BufferArgs = gBufferArgs(1)
     If IsMissing(Args) Then _
         Args = ArrayUtil.CreateEmptyArray()
-    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args))
+    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args, BufferArgs(3), BufferArgs(4)))
 End Sub
 
 Private Sub Buffer_2(Optional Args As Variant = Empty)
@@ -143,7 +146,7 @@ Private Sub Buffer_2(Optional Args As Variant = Empty)
     BufferArgs = gBufferArgs(2)
     If IsMissing(Args) Then _
         Args = ArrayUtil.CreateEmptyArray()
-    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args))
+    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args, BufferArgs(3), BufferArgs(4)))
 End Sub
 
 Private Sub Buffer_3(Optional Args As Variant = Empty)
@@ -152,7 +155,7 @@ Private Sub Buffer_3(Optional Args As Variant = Empty)
     BufferArgs = gBufferArgs(3)
     If IsMissing(Args) Then _
         Args = ArrayUtil.CreateEmptyArray()
-    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args))
+    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args, BufferArgs(3), BufferArgs(4)))
 End Sub
 
 Private Sub Buffer_4(Optional Args As Variant = Empty)
@@ -161,7 +164,7 @@ Private Sub Buffer_4(Optional Args As Variant = Empty)
     BufferArgs = gBufferArgs(4)
     If IsMissing(Args) Then _
         Args = ArrayUtil.CreateEmptyArray()
-    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args))
+    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args, BufferArgs(3), BufferArgs(4)))
 End Sub
 
 Private Sub Buffer_5(Optional Args As Variant = Empty)
@@ -170,7 +173,7 @@ Private Sub Buffer_5(Optional Args As Variant = Empty)
     BufferArgs = gBufferArgs(5)
     If IsMissing(Args) Then _
         Args = ArrayUtil.CreateEmptyArray()
-    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args))
+    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args, BufferArgs(3), BufferArgs(4)))
 End Sub
 
 Private Sub Buffer_6(Optional Args As Variant = Empty)
@@ -179,7 +182,7 @@ Private Sub Buffer_6(Optional Args As Variant = Empty)
     BufferArgs = gBufferArgs(6)
     If IsMissing(Args) Then _
         Args = ArrayUtil.CreateEmptyArray()
-    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args))
+    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args, BufferArgs(3), BufferArgs(4)))
 End Sub
 
 Private Sub Buffer_7(Optional Args As Variant = Empty)
@@ -188,7 +191,7 @@ Private Sub Buffer_7(Optional Args As Variant = Empty)
     BufferArgs = gBufferArgs(7)
     If IsMissing(Args) Then _
         Args = ArrayUtil.CreateEmptyArray()
-    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args))
+    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args, BufferArgs(3), BufferArgs(4)))
 End Sub
 
 Private Sub Buffer_8(Optional Args As Variant = Empty)
@@ -197,7 +200,7 @@ Private Sub Buffer_8(Optional Args As Variant = Empty)
     BufferArgs = gBufferArgs(8)
     If IsMissing(Args) Then _
         Args = ArrayUtil.CreateEmptyArray()
-    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args))
+    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args, BufferArgs(3), BufferArgs(4)))
 End Sub
 
 Private Sub Buffer_9(Optional Args As Variant = Empty)
@@ -206,7 +209,7 @@ Private Sub Buffer_9(Optional Args As Variant = Empty)
     BufferArgs = gBufferArgs(9)
     If IsMissing(Args) Then _
         Args = ArrayUtil.CreateEmptyArray()
-    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args))
+    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args, BufferArgs(3), BufferArgs(4)))
 End Sub
 
 

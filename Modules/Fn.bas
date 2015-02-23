@@ -53,7 +53,9 @@ Private Const ERR_SOURCE As String = "Fn"
 Private Const ERR_OFFSET As Long = 2000
 
 Private Const BUFFER_MODULE As String = "FnBuffer"
+Private Const LAMBDA_MODULE As String = "FnLambda"
 Private Const BUFFER_PATTERN As String = BUFFER_MODULE & "*"
+Private Const LAMBDA_PATTERN As String = LAMBDA_MODULE & "*"
 
 ' ## Property
 '
@@ -88,7 +90,13 @@ On Error GoTo ErrHandler:
             Case Else
                 Application.Run MethodName, Args_
         End Select
-        
+    ElseIf MethodName Like LAMBDA_PATTERN Then
+        Select Case Size_
+            Case 0
+                Application.Run MethodName
+            Case Else
+                Application.Run MethodName, Args_
+        End Select
     Else
         ' The long case of Application.Run, Python FTW
         Select Case Size_
@@ -193,43 +201,58 @@ End Sub
 ' These functions combines functions basically.
 
 '# Curries functions, returns the buffer name to be used by invoke
-Public Function Curry(MethodName As String, PreArgs As Variant) As String
-    Curry = GenerateBufferDefinition(FnBuffer.CURRY_METHOD, MethodName, PreArgs)
+Public Function Curry(MethodName As String, PreArgs As Variant, _
+                    Optional ClosureArgs As Variant = Empty) As String
+    Curry = GenerateBufferDefinition(FnBuffer.CURRY_METHOD, MethodName, PreArgs, ClosureArgs)
 End Function
 
 '# Combines several functions together, think of function composition here
-Public Function Compose(MethodNames As Variant) As String
-    Compose = GenerateBufferDefinition(FnBuffer.COMPOSE_METHOD, MethodNames, Empty)
+Public Function Compose(MethodNames As Variant, _
+                    Optional ClosureArgs As Variant = Empty) As String
+    Compose = GenerateBufferDefinition(FnBuffer.COMPOSE_METHOD, MethodNames, Empty, ClosureArgs)
 End Function
 
 '# This is similar to curry but this functions more as a closure or a deferred executor
 '# This function accepts a method name given predefined arguments
 '# Primarily used to Map array of functions given arguments
 '# This gives you the ability to put the function name as the parameter
-Public Function Reinvoke(Args As Variant)
-    Reinvoke = GenerateBufferDefinition(FnBuffer.REINVOKE_METHOD, Empty, Args)
+Public Function Reinvoke(Args As Variant, _
+                    Optional ClosureArgs As Variant = Empty)
+    Reinvoke = GenerateBufferDefinition(FnBuffer.REINVOKE_METHOD, Empty, Args, ClosureArgs)
 End Function
 
 '# Wraps a function to accept an argument array instead of a plain argument
 '# This is used basically wrapped multiple arguments to one, quite hard to explain
-Public Function Lambda(MethodName As Variant)
-    Lambda = GenerateBufferDefinition(FnBuffer.LAMBDA_METHOD, MethodName, Empty)
+Public Function Lambda(MethodName As Variant, _
+                    Optional ClosureArgs As Variant = Empty)
+    Lambda = GenerateBufferDefinition(FnBuffer.LAMBDA_METHOD, MethodName, Empty, ClosureArgs)
 End Function
 
 '# Builds the definition of the buffer
-Private Function GenerateBufferDefinition(BufferMethodName As String, MethodName As Variant, BufferArgs As Variant) As String
+Private Function GenerateBufferDefinition(BufferMethodName As String, MethodName As Variant, BufferArgs As Variant, ClosureArgs As Variant) As String
     Dim BIndex As Long
     FnBuffer.InitializeBuffers
     BIndex = FnBuffer.GetNextBufferIndex()
     FnBuffer.SetBuffer Array( _
-        BuildBufferName(BufferMethodName), MethodName, BufferArgs), _
+        BuildBufferName(BufferMethodName), MethodName, BufferArgs, ClosureArgs, BIndex), _
         BIndex
     GenerateBufferDefinition = BuildBufferName(BUFFER_PREFIX) & BIndex
 End Function
+
+'# Like GenerateBufferDefinition but for Lambda pattern
+Public Function GenerateLambdaBufferDefinition(LambdaMethodName As String, MethodName As Variant, BufferArgs As Variant, ClosureArgs As Variant) As String
+    Dim BIndex As Long
+    FnBuffer.InitializeBuffers
+    BIndex = FnBuffer.GetNextBufferIndex()
+    FnBuffer.SetBuffer Array( _
+        LambdaMethodName, MethodName, BufferArgs, ClosureArgs, BIndex), _
+        BIndex
+    GenerateLambdaBufferDefinition = BuildBufferName(BUFFER_PREFIX) & BIndex
+End Function
+
 
 '# Builds the full buffer module function name for use given the module and method
 Private Function BuildBufferName(MethodName As String) As String
     BuildBufferName = BUFFER_MODULE & "." & MethodName
 End Function
-
 
