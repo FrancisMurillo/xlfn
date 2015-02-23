@@ -29,7 +29,7 @@ Not much of a difference except the return mechanism and the function header wit
 
 ```VB.net
   Debug.Print MyModule.Add(1, 2) 
-  Debug.Print Fn.Invoke("Fn.Invoke("MyModule.Add_", Array(1, 2))
+  Debug.Print Fn.Invoke("MyModule.Add_", Array(1, 2))
   Debug.Print Fn.InvokeTwoArgs("MyModule.Add_", 1, 2)
 ```
 
