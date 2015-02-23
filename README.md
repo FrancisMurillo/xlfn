@@ -84,7 +84,7 @@ This is a <a href="https://github.com/FrancisMurillo/xlchip">chip</a> project, s
 
 1. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/Fn.bas">Fn.bas</a>
 2. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnBuffer.bas">FnBuffer.bas</a>
-3. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnUtil.bas">FnUtil.bas</a>
+3. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnUtil.bas">FnArrayUtil.bas</a>
 4. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnArrayUtil.bas">FnArrayUtil.bas</a>
 5. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnPredicate.bas">FnPredicate.bas</a>
 6. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnFunction.bas">FnFunction.bas</a>
@@ -98,7 +98,7 @@ And include in your project references the following.
 So to see if it's working, run in the Intermediate Window or what I call the *terminal*.
 
 ```VB.net
-  Debug.Print Fn.InvokeOneArg("FnOperator.Identity_", "Hello World!")
+  Fn.Hello()
 ```
 
-You should see in the window output **"Hello World"** in the intermediate window as well.
+You should see in the window output **"Hello Fn: The Pseudo Functional Programming Library for VBA"** in the intermediate window.

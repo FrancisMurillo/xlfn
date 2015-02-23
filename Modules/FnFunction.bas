@@ -4,6 +4,14 @@ Attribute VB_Name = "FnFunction"
 '
 ' A set of one argument functions for you
 
+' ## Function Constants
+'
+' These constants are to aid typing with the intellisense
+
+Public Const METHOD_PREFIX As String = "FnFunction."
+
+Public Const Identity As String = METHOD_PREFIX & "Identity_"
+
 ' ## Generic Functions
 '
 ' Functions doing somethings random or useful

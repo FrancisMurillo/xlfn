@@ -52,7 +52,12 @@ End Sub
 
 '# Random tripet formula
 Public Sub Formula_(Tuple As Variant)
-    Fn.Result = NumericArrayUtil.Product(Tuple)
+    Dim Product As Long, Elem_ As Variant
+    Product = 1
+    For Each Elem_ In Tuple
+        Product = Product * Elem_
+    Next
+    Fn.Result = Product
 End Sub
 
 '# A quick triple sum

@@ -183,6 +183,11 @@ Public Function InvokeTwoArg(MethodName As String, Arg1 As Variant, Arg2 As Vari
     InvokeTwoArg = Invoke(MethodName, Array(Arg1, Arg2))
 End Function
 
+'# Just a function to easily test the installation of Fn
+Public Sub Hello()
+    Debug.Print Fn.InvokeOneArg(FnFunction.Identity, "Hello Fn: The Pseudo Functional Programming Library for VBA")
+End Sub
+
 ' ## Combinator Functions
 '
 ' These functions combines functions basically.
