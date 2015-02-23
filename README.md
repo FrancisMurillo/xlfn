@@ -7,7 +7,7 @@ After working for some time in an limited Windows environment without Python or 
 
 ### Introduction
 
-Since VBA doesn't have lambdas or closure or the first class functions, you can't declare function variables. A little cheap but the other workaround for this is that you can declare String variables that contain the function name you want to invoke, so this is the route this library takes. This is done by Application.Run which serious flaws. One serious weak point is that functions invoked by Application.Run cannot return value. So how do we go about the return mechanism? Cheap but it can be done by declaring a global variable as the return holder and returning this value after the function invokation which is defined here as Fn.Result. 
+Since VBA doesn't have lambdas or closure or the first class functions, you can't declare function variables. A little cheap but the other workaround for this is that you can declare String variables that contain the function name you want to invoke, so this is the route this library takes. This is done by *Application.Run* which serious flaws. One serious weak point is that functions invoked by Application.Run cannot return value. So how do we go about the return mechanism? Cheap but it can be done by declaring a global variable as the return holder and returning this value after the function invokation which is defined here as Fn.Result. 
 
 So in short, we have to refit our functions so that they can be "invokable" by Application.Run. Take this simple sample addition function in the module MyModule.
 
@@ -80,5 +80,24 @@ Just a word of warning, these functions might run slower than the longer version
 
 ### Quick Start
 
-This is a chip project
+This is a <a href="https://github.com/FrancisMurillo/xlchip">chip</a> project, so you can download this via *Chip.ChipOnFromRepo "Fn"* or if you want to install it via importing module. Just import these four modules in your project.
 
+1. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/Fn.bas">Fn.bas</a>
+2. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnBuffer.bas">FnBuffer.bas</a>
+3. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnArrayUtil.bas">FnArrayUtil.bas</a>
+4. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnPredicate.bas">FnPredicate.bas</a>
+5. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnFunction.bas">FnFunction.bas</a>
+6. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnOperator.bas">FnOperator.bas</a>
+
+And include in your project references the following.
+
+1. **Microsoft Visual Basic for Applications Extensibility 5.3** - Any version would do but it has been tested with version 5.3
+2. **Microsoft Scripting Runtime** - Just for compatibility sake
+
+So to see if it's working, run in the Intermediate Window or what I call the *terminal*.
+
+```VB.net
+  Debug.Print Fn.InvokeOneArg("FnOperator.Identity_", "Hello World!")
+```
+
+You should see in the window output *"Hello World"* in the intermediate window as well.
