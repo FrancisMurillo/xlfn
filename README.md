@@ -11,7 +11,7 @@ Since VBA doesn't have lambdas or closure or the first class functions, you can'
 
 So in short, we have to refit our functions so that they can be "invokable" by Application.Run. Take this simple sample addition function in the module MyModule.
 
-```VBA
+```VB.net
 Public Function Add(A As Long, B as Long) as Long
   Add = A + B
 End Function
@@ -19,7 +19,7 @@ End Function
 
 The newly reflavored function with the above workaround
 
-```VBA
+```VB.net
 Public Sub Add_(A as Long, B as Long)
   Fn.Result = A + B
 End Sub
@@ -27,7 +27,7 @@ End Sub
 
 Not much of a difference except the return mechanism and the function header without the return type. Now to invoke this quasi function is done through Fn.Invoke seen here.
 
-```VBA
+```VB.net
   Debug.Print MyModule.Add(1, 2) 
   Debug.Print Fn.Invoke("Fn.Invoke("MyModule.Add_", Array(1, 2))
   Debug.Print Fn.InvokeTwoArgs("MyModule.Add_", 1, 2)
@@ -35,7 +35,7 @@ Not much of a difference except the return mechanism and the function header wit
 
 Note the way functions are invoked using their full name([Module Name].[Method Name]) and how the arguments are wrapped in the Array() function, a little cumbersome but a necessary evil since you can't call the functions straight. Now with this function mechanism, the core functional method Filter, Reduce and Map is now fully available at our disposal as seen here.
 
-```VBA
+```VB.net
 Public Sub IsOdd_(Val as Long) 
   Fn.Result = ((Val Mod 2) = 1)
 End Sub
