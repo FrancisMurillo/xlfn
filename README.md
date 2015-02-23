@@ -76,7 +76,7 @@ End Sub
 
 Compare the code, without using FP there would be some boilerplate just to filter a simple array although it can be still shortened. The mechanism of lambdas here are somewhat cumbersome but with the ability of Map, Filter and Reduce at the ready, it's a small price to pay for these three functional functions. There are others such as ZipWith, Sort, and so on just to make this worthwhile.
 
-Just a word of warning, these functions might run slower than the longer versions since there is the overhead of Application.Run as well as the transfer mechanisms involved. But if performance is not an issue, then this library is good for you and your sanity.
+Just a word of warning, these functions might run slower than the longer versions since there is the overhead of Application.Run as well as the transfer mechanisms involved although Python can get the same flak. But if performance is not an issue, then this library is good for you and your sanity.
 
 ### Quick Start
 
