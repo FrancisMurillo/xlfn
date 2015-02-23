@@ -7,7 +7,7 @@ After working for some time in an limited Windows environment without Python or 
 
 ### Introduction
 
-Since VBA doesn't have lambdas or closure or the first class functions, you can't declare function variables. A little cheap but the other workaround for this is that you can declare String variables that contain the function name you want to invoke, so this is the route this library takes. This is done by *Application.Run* which serious flaws. One serious weak point is that functions invoked by Application.Run cannot return value. So how do we go about the return mechanism? Cheap but it can be done by declaring a global variable as the return holder and returning this value after the function invokation which is defined here as Fn.Result. 
+Since VBA doesn't have lambdas or closure or the first class functions, you can't declare function variables. A little cheap but the other workaround for this is that you can declare String variables that contain the function name you want to invoke, so this is the route this library takes. This is done by **Application.Run** which serious flaws. One serious weak point is that functions invoked by Application.Run cannot return value. So how do we go about the return mechanism? Cheap but it can be done by declaring a global variable as the return holder and returning this value after the function invokation which is defined here as Fn.Result. 
 
 So in short, we have to refit our functions so that they can be "invokable" by Application.Run. Take this simple sample addition function in the module MyModule.
 
@@ -100,4 +100,4 @@ So to see if it's working, run in the Intermediate Window or what I call the *te
   Debug.Print Fn.InvokeOneArg("FnOperator.Identity_", "Hello World!")
 ```
 
-You should see in the window output *"Hello World"* in the intermediate window as well.
+You should see in the window output **"Hello World"** in the intermediate window as well.
