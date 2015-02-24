@@ -27,7 +27,7 @@ Public Sub Add_(A as Long, B as Long)
 End Sub
 ```
 
-Not much of a difference except the return mechanism and the function header without the return type. Now to invoke this quasi function is done through Fn.Invoke seen here.
+Not much of a difference except the return mechanism and the function header without the return type. Now to invoke this quasi function is done through **Fn.Invoke** seen here.
 
 ```VB.net
   Debug.Print MyModule.Add(1, 2) 
@@ -35,37 +35,43 @@ Not much of a difference except the return mechanism and the function header wit
   Debug.Print Fn.InvokeTwoArgs("MyModule.Add_", 1, 2)
 ```
 
-Note the way functions are invoked using their full name([Module Name].[Method Name]) and how the arguments are wrapped in the **Array()** function, a little cumbersome but a necessary evil since you can't call the functions straight. Now with this function mechanism, the core functional method Filter, Reduce and Map is now fully available at our disposal as seen here.
+Note the way functions are invoked using their full name([Module Name].[Method Name]) and how the arguments are wrapped in the **Array()** function, a little cumbersome but a necessary evil since you can't call the functions straight. Now with this function mechanism, the core functional method Filter, Reduce and Map can be implemented nicely. A sample of **FnArrayUtil.Filter** is shown here.
 
 ```VB.net
+' Lambda definition
 Public Sub IsOdd_(Val as Long) 
   Fn.Result = ((Val Mod 2) = 1)
 End Sub
 
+' Functional Programming Style
 Public Sub FilteringUsingFP()
   Dim MyVals as Variant, OddVals as Variant
   MyVals = Array(1, 2, 4, 5, 7, 8, 10)
   
-  OddVals = FnArrayUtil.Filter("MyModule.IsOdd_", MyVals)
+  OddVals = FnArrayUtil.Filter("MyModule.IsOdd_", MyVals) ' Filter at work
   Debug.Print ArrayUtil.Print_(OddVals) ' Returns [1, 5, 7]
 End Sub
 
+' Vanilla VBA with ArrayUtil
 Public Sub FilteringWithoutFP()
   Dim MyVals as Variant
   MyVals = Array(1, 2, 4, 5, 7, 8 , 10)
   
+  ' Boilerplate code to filter an array
   Dim OddVals as Variant, ValIndex as Long, MyValIndex as Long, MyVal as Long
-  OddVals = ArrayUtil.CloneSize(MyVals)
+  OddVals = ArrayUtil.CloneSize(MyVals) ' Create an array with the same LBound and UBound as MyVals
   ValIndex = 0
   
+  ' Looping the array boilerplate
   For MyValIndex = 0 to UBound(MyVals)
     MyVal = MyVals(MyValIndex)
-    If ((MyVal Mod 2 ) = 1) Then
-      OddVals(ValIndex) = MyVal
-      ValIndex = ValIndex + 1
+    If ((MyVal Mod 2 ) = 1) Then ' Filtering here
+      OddVals(ValIndex) = MyVal ' Adding an array the hard way
+      ValIndex = ValIndex + 1 
     End if
   Next
   
+  ' Trimming the array size, can be put in a method as well but more efficient in this form
   If ValIndex = 0 Then
     OddVals = Array()
   Else
