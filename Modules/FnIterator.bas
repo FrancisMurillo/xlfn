@@ -11,8 +11,8 @@ Attribute VB_Name = "FnIterator"
 Private Const ERR_SOURCE As String = "FnIterator"
 Private Const ERR_OFFSET As Long = 2200
 
-Private Const Constant_Lambda As String = FnLambda.MODULE_PREFIX & "Constant_Lambda"
-Private Const Cycle_Lambda As String = FnLambda.MODULE_PREFIX & "Cycle_Lambda"
+Private Const Constant_Lambda As String = "Constant_Lambda"
+Private Const Cycle_Lambda As String = "Cycle_Lambda"
 
 
 ' ## Iterator Functions

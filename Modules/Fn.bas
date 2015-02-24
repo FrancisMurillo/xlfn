@@ -54,15 +54,36 @@ Private Const ERR_OFFSET As Long = 2000
 
 Private Const BUFFER_MODULE As String = "FnBuffer"
 Private Const LAMBDA_MODULE As String = "FnLambda"
-Private Const BUFFER_PATTERN As String = BUFFER_MODULE & "*"
-Private Const LAMBDA_PATTERN As String = LAMBDA_MODULE & "*"
+Private Const BUFFER_PATTERN As String = BUFFER_MODULE & ".*"
+Private Const LAMBDA_PATTERN As String = LAMBDA_MODULE & ".*"
 
 ' ## Property
-'
-' The Result property, place your result here. Write-only, that's what it's supposed to be.
+
 Private gResult As Variant
+Private gClosure As Variant
+Private gBufferIndex As Long
+Private gPreArgs As Variant
+
+'# The Result property, place your result here. Write-only, that's what it's supposed to be.
+
 Public Property Let Result(Val As Variant)
     gResult = Val
+End Property
+
+'# The Closure property for easier read and write
+Public Property Let Closure(Val As Variant)
+    gClosure = Val
+End Property
+Public Property Get Closure() As Variant
+    Closure = gClosure
+End Property
+
+'# Buffer Index property
+
+
+'# The arguments applied before the buffer function
+Public Property Get PreArgs() As Variant
+    PreArgs = gPreArgs
 End Property
 
 ' ## Functions
@@ -78,93 +99,26 @@ End Property
 'P       The arguments are applied by order not by index, but make my our easier by using Array() to wrap the arguments
 Public Function Invoke(MethodName As String, Args As Variant) As Variant
 On Error GoTo ErrHandler:
-    Dim Size_ As Long, Args_ As Variant
+    Dim Args_ As Variant
     Args_ = ArrayUtil.AsNormalArray(Args)
-    Size_ = ArrayUtil.Size(Args_)
     
+    ' Reset variables
     gResult = Empty
+    gClosure = Empty
+    gBufferIndex = Empty
+    gPreArgs = Empty
+    
     If MethodName Like BUFFER_PATTERN Then
-        Select Case Size_
-            Case 0
-                Application.Run MethodName
-            Case Else
-                Application.Run MethodName, Args_
-        End Select
+        NonLeafInvokation MethodName, Args_
     ElseIf MethodName Like LAMBDA_PATTERN Then
-        Select Case Size_
-            Case 0
-                Application.Run MethodName
-            Case Else
-                Application.Run MethodName, Args_
-        End Select
+        gClosure = Args_(3)
+        gBufferIndex = Args_(4)
+    
+        NonLeafInvokation MethodName, Args_
+    
+        Call FnBuffer.SetClosureBufferArgs(gClosure, gBufferIndex)
     Else
-        ' The long case of Application.Run, Python FTW
-        Select Case Size_
-            Case 0
-                Application.Run MethodName
-            Case 1
-                Application.Run MethodName, Args_(0)
-            Case 2
-                Application.Run MethodName, Args_(0), Args_(1)
-            Case 3
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2)
-            Case 4
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3)
-            Case 5
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4)
-            Case 6
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5)
-            Case 7
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6)
-            Case 8
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7)
-            Case 9
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8)
-            Case 10
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9)
-            Case 11
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9), Args_(10)
-            Case 12
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9), Args_(10), Args_(11)
-            Case 13
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9), Args_(10), Args_(11), Args_(12)
-            Case 14
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9), Args_(10), Args_(11), Args_(12), Args_(13)
-            Case 15
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9), Args_(10), Args_(11), Args_(12), Args_(13), Args_(14)
-            Case 16
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9), Args_(10), Args_(11), Args_(12), Args_(13), Args_(14), Args_(15)
-            Case 17
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9), Args_(10), Args_(11), Args_(12), Args_(13), Args_(14), Args_(15), Args_(16)
-            Case 18
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9), Args_(10), Args_(11), Args_(12), Args_(13), Args_(14), Args_(15), Args_(16), Args_(17)
-            Case 19
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9), Args_(10), Args_(11), Args_(12), Args_(13), Args_(14), Args_(15), Args_(16), Args_(17), Args_(18)
-            Case 20
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9), Args_(10), Args_(11), Args_(12), Args_(13), Args_(14), Args_(15), Args_(16), Args_(17), Args_(18), Args_(19)
-            Case 21
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9), Args_(10), Args_(11), Args_(12), Args_(13), Args_(14), Args_(15), Args_(16), Args_(17), Args_(18), Args_(19), Args_(20)
-            Case 22
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9), Args_(10), Args_(11), Args_(12), Args_(13), Args_(14), Args_(15), Args_(16), Args_(17), Args_(18), Args_(19), Args_(20), Args_(21)
-            Case 23
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9), Args_(10), Args_(11), Args_(12), Args_(13), Args_(14), Args_(15), Args_(16), Args_(17), Args_(18), Args_(19), Args_(20), Args_(21), Args_(22)
-            Case 24
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9), Args_(10), Args_(11), Args_(12), Args_(13), Args_(14), Args_(15), Args_(16), Args_(17), Args_(18), Args_(19), Args_(20), Args_(21), Args_(22), Args_(23)
-            Case 25
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9), Args_(10), Args_(11), Args_(12), Args_(13), Args_(14), Args_(15), Args_(16), Args_(17), Args_(18), Args_(19), Args_(20), Args_(21), Args_(22), Args_(23), Args_(24)
-            Case 26
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9), Args_(10), Args_(11), Args_(12), Args_(13), Args_(14), Args_(15), Args_(16), Args_(17), Args_(18), Args_(19), Args_(20), Args_(21), Args_(22), Args_(23), Args_(24), Args_(25)
-            Case 27
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9), Args_(10), Args_(11), Args_(12), Args_(13), Args_(14), Args_(15), Args_(16), Args_(17), Args_(18), Args_(19), Args_(20), Args_(21), Args_(22), Args_(23), Args_(24), Args_(25), Args_(26)
-            Case 28
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9), Args_(10), Args_(11), Args_(12), Args_(13), Args_(14), Args_(15), Args_(16), Args_(17), Args_(18), Args_(19), Args_(20), Args_(21), Args_(22), Args_(23), Args_(24), Args_(25), Args_(26), Args_(27)
-            Case 29
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9), Args_(10), Args_(11), Args_(12), Args_(13), Args_(14), Args_(15), Args_(16), Args_(17), Args_(18), Args_(19), Args_(20), Args_(21), Args_(22), Args_(23), Args_(24), Args_(25), Args_(26), Args_(27), Args_(28)
-            Case 30
-                Application.Run MethodName, Args_(0), Args_(1), Args_(2), Args_(3), Args_(4), Args_(5), Args_(6), Args_(7), Args_(8), Args_(9), Args_(10), Args_(11), Args_(12), Args_(13), Args_(14), Args_(15), Args_(16), Args_(17), Args_(18), Args_(19), Args_(20), Args_(21), Args_(22), Args_(23), Args_(24), Args_(25), Args_(26), Args_(27), Args_(28), Args_(29)
-            Case Else
-                Err.Raise vbObjectError + ERR_OFFSET, ERR_SOURCE, "Invoking " & MethodName & " with " & Size_ & " arguments exceeded the maximum number(30)"
-        End Select
+        LeafInvokation MethodName, Args_
     End If
     
     Invoke = gResult
@@ -175,6 +129,88 @@ ErrHandler:
         Err.Raise vbObjectError + ERR_OFFSET, ERR_SOURCE, MethodName & " caused an error: " & Err.Description
     End If
 End Function
+
+'# Just passes the invokation
+Public Sub NonLeafInvokation(MethodName As String, Args As Variant)
+    If ArrayUtil.IsEmptyArray(Args) Then
+        Application.Run MethodName
+    Else
+        Application.Run MethodName, Args
+    End If
+End Sub
+
+'# The very application of an invokation
+Public Sub LeafInvokation(MethodName As String, Args As Variant)
+    Dim Size_ As Long
+    Size_ = ArrayUtil.Size(Args)
+    ' The long case of Application.Run, Python FTW
+    Select Case Size_
+        Case 0
+            Application.Run MethodName
+        Case 1
+            Application.Run MethodName, Args(0)
+        Case 2
+            Application.Run MethodName, Args(0), Args(1)
+        Case 3
+            Application.Run MethodName, Args(0), Args(1), Args(2)
+        Case 4
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3)
+        Case 5
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4)
+        Case 6
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5)
+        Case 7
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6)
+        Case 8
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7)
+        Case 9
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8)
+        Case 10
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9)
+        Case 11
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9), Args(10)
+        Case 12
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9), Args(10), Args(11)
+        Case 13
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9), Args(10), Args(11), Args(12)
+        Case 14
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9), Args(10), Args(11), Args(12), Args(13)
+        Case 15
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9), Args(10), Args(11), Args(12), Args(13), Args(14)
+        Case 16
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9), Args(10), Args(11), Args(12), Args(13), Args(14), Args(15)
+        Case 17
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9), Args(10), Args(11), Args(12), Args(13), Args(14), Args(15), Args(16)
+        Case 18
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9), Args(10), Args(11), Args(12), Args(13), Args(14), Args(15), Args(16), Args(17)
+        Case 19
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9), Args(10), Args(11), Args(12), Args(13), Args(14), Args(15), Args(16), Args(17), Args(18)
+        Case 20
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9), Args(10), Args(11), Args(12), Args(13), Args(14), Args(15), Args(16), Args(17), Args(18), Args(19)
+        Case 21
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9), Args(10), Args(11), Args(12), Args(13), Args(14), Args(15), Args(16), Args(17), Args(18), Args(19), Args(20)
+        Case 22
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9), Args(10), Args(11), Args(12), Args(13), Args(14), Args(15), Args(16), Args(17), Args(18), Args(19), Args(20), Args(21)
+        Case 23
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9), Args(10), Args(11), Args(12), Args(13), Args(14), Args(15), Args(16), Args(17), Args(18), Args(19), Args(20), Args(21), Args(22)
+        Case 24
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9), Args(10), Args(11), Args(12), Args(13), Args(14), Args(15), Args(16), Args(17), Args(18), Args(19), Args(20), Args(21), Args(22), Args(23)
+        Case 25
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9), Args(10), Args(11), Args(12), Args(13), Args(14), Args(15), Args(16), Args(17), Args(18), Args(19), Args(20), Args(21), Args(22), Args(23), Args(24)
+        Case 26
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9), Args(10), Args(11), Args(12), Args(13), Args(14), Args(15), Args(16), Args(17), Args(18), Args(19), Args(20), Args(21), Args(22), Args(23), Args(24), Args(25)
+        Case 27
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9), Args(10), Args(11), Args(12), Args(13), Args(14), Args(15), Args(16), Args(17), Args(18), Args(19), Args(20), Args(21), Args(22), Args(23), Args(24), Args(25), Args(26)
+        Case 28
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9), Args(10), Args(11), Args(12), Args(13), Args(14), Args(15), Args(16), Args(17), Args(18), Args(19), Args(20), Args(21), Args(22), Args(23), Args(24), Args(25), Args(26), Args(27)
+        Case 29
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9), Args(10), Args(11), Args(12), Args(13), Args(14), Args(15), Args(16), Args(17), Args(18), Args(19), Args(20), Args(21), Args(22), Args(23), Args(24), Args(25), Args(26), Args(27), Args(28)
+        Case 30
+            Application.Run MethodName, Args(0), Args(1), Args(2), Args(3), Args(4), Args(5), Args(6), Args(7), Args(8), Args(9), Args(10), Args(11), Args(12), Args(13), Args(14), Args(15), Args(16), Args(17), Args(18), Args(19), Args(20), Args(21), Args(22), Args(23), Args(24), Args(25), Args(26), Args(27), Args(28), Args(29)
+        Case Else
+            Err.Raise vbObjectError + ERR_OFFSET, ERR_SOURCE, "Invoking " & MethodName & " with " & Size_ & " arguments exceeded the maximum number(30)"
+    End Select
+End Sub
 
 '# Invokes a method without arguments
 Public Function InvokeNoArgs(MethodName As String)
@@ -203,13 +239,13 @@ End Sub
 '# Curries functions, returns the buffer name to be used by invoke
 Public Function Curry(MethodName As String, PreArgs As Variant, _
                     Optional ClosureArgs As Variant = Empty) As String
-    Curry = GenerateBufferDefinition(FnBuffer.CURRY_METHOD, MethodName, PreArgs, ClosureArgs)
+    Curry = GenerateLambdaBufferDefinition(FnBuffer.CURRY_METHOD, MethodName, PreArgs, ClosureArgs)
 End Function
 
 '# Combines several functions together, think of function composition here
 Public Function Compose(MethodNames As Variant, _
                     Optional ClosureArgs As Variant = Empty) As String
-    Compose = GenerateBufferDefinition(FnBuffer.COMPOSE_METHOD, MethodNames, Empty, ClosureArgs)
+    Compose = GenerateLambdaBufferDefinition(FnBuffer.COMPOSE_METHOD, MethodNames, Empty, ClosureArgs)
 End Function
 
 '# This is similar to curry but this functions more as a closure or a deferred executor
@@ -218,14 +254,14 @@ End Function
 '# This gives you the ability to put the function name as the parameter
 Public Function Reinvoke(Args As Variant, _
                     Optional ClosureArgs As Variant = Empty)
-    Reinvoke = GenerateBufferDefinition(FnBuffer.REINVOKE_METHOD, Empty, Args, ClosureArgs)
+    Reinvoke = GenerateLambdaBufferDefinition(FnBuffer.REINVOKE_METHOD, Empty, Args, ClosureArgs)
 End Function
 
 '# Wraps a function to accept an argument array instead of a plain argument
 '# This is used basically wrapped multiple arguments to one, quite hard to explain
 Public Function Lambda(MethodName As Variant, _
                     Optional ClosureArgs As Variant = Empty)
-    Lambda = GenerateBufferDefinition(FnBuffer.LAMBDA_METHOD, MethodName, Empty, ClosureArgs)
+    Lambda = GenerateLambdaBufferDefinition(FnBuffer.LAMBDA_METHOD, MethodName, Empty, ClosureArgs)
 End Function
 
 '# Builds the definition of the buffer
@@ -245,7 +281,7 @@ Public Function GenerateLambdaBufferDefinition(LambdaMethodName As String, Metho
     FnBuffer.InitializeBuffers
     BIndex = FnBuffer.GetNextBufferIndex()
     FnBuffer.SetBuffer Array( _
-        LambdaMethodName, MethodName, BufferArgs, ClosureArgs, BIndex), _
+        BuildLambdaBufferName(LambdaMethodName), MethodName, BufferArgs, ClosureArgs, BIndex), _
         BIndex
     GenerateLambdaBufferDefinition = BuildBufferName(BUFFER_PREFIX) & BIndex
 End Function
@@ -254,5 +290,8 @@ End Function
 '# Builds the full buffer module function name for use given the module and method
 Private Function BuildBufferName(MethodName As String) As String
     BuildBufferName = BUFFER_MODULE & "." & MethodName
+End Function
+Private Function BuildLambdaBufferName(MethodName As String) As String
+    BuildLambdaBufferName = LAMBDA_MODULE & "." & MethodName
 End Function
 
