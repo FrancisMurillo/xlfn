@@ -5,6 +5,8 @@ A pseudo functional programming library for Excel VBA.
 
 After working for some time in an limited Windows environment without Python or Haskell and making Excel VBA modules, wouldn't it be nice to have a small piece of functional programming on VBA to ease the development pain? So with a little magic from <a href="https://msdn.microsoft.com/en-us/library/office/ff197132.aspx">Application.Run</a> and inspiration from Python's <a href="https://github.com/kachayev/fn.py">fn.py</a>, here is a quasi functional programming library for and done purely in VBA.
 
+**To God I plant this seed, may it turn into a forest**
+
 ### Introduction
 
 Since VBA doesn't have lambdas or closure or the first class functions, you can't declare function variables. A little cheap but the other workaround for this is that you can declare String variables that contain the function name you want to invoke, so this is the route this library takes. This is done by **Application.Run** which serious flaws. One serious weak point is that functions invoked by **Application.Run** cannot return value. So how do we go about the return mechanism? Cheap but it can be done by declaring a global variable as the return holder and returning this value after the function invokation which is defined here as **Fn.Result**. 
@@ -25,7 +27,7 @@ Public Sub Add_(A as Long, B as Long)
 End Sub
 ```
 
-Not much of a difference except the return mechanism and the function header without the return type. Now to invoke this quasi function is done through Fn.Invoke seen here.
+Not much of a difference except the return mechanism and the function header without the return type. Now to invoke this quasi function is done through **Fn.Invoke** seen here.
 
 ```VB.net
   Debug.Print MyModule.Add(1, 2) 
@@ -33,37 +35,43 @@ Not much of a difference except the return mechanism and the function header wit
   Debug.Print Fn.InvokeTwoArgs("MyModule.Add_", 1, 2)
 ```
 
-Note the way functions are invoked using their full name([Module Name].[Method Name]) and how the arguments are wrapped in the **Array()** function, a little cumbersome but a necessary evil since you can't call the functions straight. Now with this function mechanism, the core functional method Filter, Reduce and Map is now fully available at our disposal as seen here.
+Note the way functions are invoked using their full name([Module Name].[Method Name]) and how the arguments are wrapped in the **Array()** function, a little cumbersome but a necessary evil since you can't call the functions straight. Now with this function mechanism, the core functional method Filter, Reduce and Map can be implemented nicely. A sample of **FnArrayUtil.Filter** is shown here.
 
 ```VB.net
+' Lambda definition
 Public Sub IsOdd_(Val as Long) 
   Fn.Result = ((Val Mod 2) = 1)
 End Sub
 
+' Functional Programming Style
 Public Sub FilteringUsingFP()
   Dim MyVals as Variant, OddVals as Variant
   MyVals = Array(1, 2, 4, 5, 7, 8, 10)
   
-  OddVals = FnArrayUtil.Filter("MyModule.IsOdd_", MyVals)
+  OddVals = FnArrayUtil.Filter("MyModule.IsOdd_", MyVals) ' Filter at work
   Debug.Print ArrayUtil.Print_(OddVals) ' Returns [1, 5, 7]
 End Sub
 
+' Vanilla VBA with ArrayUtil
 Public Sub FilteringWithoutFP()
   Dim MyVals as Variant
   MyVals = Array(1, 2, 4, 5, 7, 8 , 10)
   
+  ' Boilerplate code to filter an array
   Dim OddVals as Variant, ValIndex as Long, MyValIndex as Long, MyVal as Long
-  OddVals = ArrayUtil.CloneSize(MyVals)
+  OddVals = ArrayUtil.CloneSize(MyVals) ' Create an array with the same LBound and UBound as MyVals
   ValIndex = 0
   
+  ' Looping the array boilerplate
   For MyValIndex = 0 to UBound(MyVals)
     MyVal = MyVals(MyValIndex)
-    If ((MyVal Mod 2 ) = 1) Then
-      OddVals(ValIndex) = MyVal
-      ValIndex = ValIndex + 1
+    If ((MyVal Mod 2 ) = 1) Then ' Filtering here
+      OddVals(ValIndex) = MyVal ' Adding an array the hard way
+      ValIndex = ValIndex + 1 
     End if
   Next
   
+  ' Trimming the array size, can be put in a method as well but more efficient in this form
   If ValIndex = 0 Then
     OddVals = Array()
   Else
