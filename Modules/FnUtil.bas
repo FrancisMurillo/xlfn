@@ -6,7 +6,10 @@ Attribute VB_Name = "FnUtil"
 '
 ' These functions end with the suffix Fn signifying the create Fn lambdas
 
-'# Returns a constant value whenever called
-Public Function ConstantFn(Constant As Variant) As String
-    ConstantFn = Fn.Curry("FnFunction.Identity_", Array(Constant))
+' ## Filtering Utilities
+
+'# Decorate the function with a not operator
+Public Function WrapNot_(BoolFn As String, _
+                    Optional ClosureArgs As Variant = Empty) As String
+    WrapNot_ = Fn.Decorate(FnFunction.Negative_Fn, BoolFn, ClosureArgs:=ClosureArgs)
 End Function

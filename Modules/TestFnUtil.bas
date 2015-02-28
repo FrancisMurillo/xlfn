@@ -1,7 +1,7 @@
 Attribute VB_Name = "TestFnUtil"
 Public Sub TestConstantFn()
     Dim Cn As String
-    Cn = FnUtil.ConstantFn(0)
+    Cn = FnIterator.Constant(0)
     
     VaseAssert.AssertEqual _
         Fn.InvokeNoArgs(Cn), 0

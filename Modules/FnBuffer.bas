@@ -21,6 +21,7 @@ Public Const CURRY_METHOD As String = "Curry_"
 Public Const COMPOSE_METHOD As String = "Compose_"
 Public Const REINVOKE_METHOD As String = "Reinvoke_"
 Public Const LAMBDA_METHOD As String = "Lambda_"
+Public Const DECORATE_METHOD As String = "Decorate_"
 
 Private gIsBufferReady As Boolean
 Private gBufferIndex As Long

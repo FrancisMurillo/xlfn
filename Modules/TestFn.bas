@@ -89,3 +89,11 @@ Public Sub TestLambda()
                 FnFunction.Negative_Fn, FnOperator.Add_Fn))))), _
         Array(3, 6, -7)
 End Sub
+
+Public Sub TestDecorate()
+    VaseAssert.AssertEqual _
+        Fn.InvokeOneArg( _
+            Fn.Decorate(FnFunction.Negative_Fn, FnFunction.Negative_Fn), _
+            1), _
+            1
+End Sub

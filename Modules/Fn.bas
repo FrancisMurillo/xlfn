@@ -53,16 +53,20 @@ Private Const ERR_SOURCE As String = "Fn"
 Private Const ERR_OFFSET As Long = 2000
 
 Private Const BUFFER_MODULE As String = "FnBuffer"
+Private Const BUFFER_PREFIX As String = "Buffer_"
 Private Const LAMBDA_MODULE As String = "FnLambda"
 Private Const BUFFER_PATTERN As String = BUFFER_MODULE & ".*"
 Private Const LAMBDA_PATTERN As String = LAMBDA_MODULE & ".*"
+Private Const BUFFER_METHOD_PATTERN As String = BUFFER_MODULE & "." & BUFFER_PREFIX & "*"
 
 ' ## Property
 
 Private gResult As Variant
+Private gNextFn As String
+Private gPreArgs As Variant
 Private gClosure As Variant
 Private gBufferIndex As Long
-Private gPreArgs As Variant
+
 
 '# The Result property, place your result here. Write-only, that's what it's supposed to be.
 
@@ -86,6 +90,11 @@ Public Property Get PreArgs() As Variant
     PreArgs = gPreArgs
 End Property
 
+'# The next method to invoke if there is one
+Public Property Get NextFn() As String
+    NextFn = gNextFn
+End Property
+
 ' ## Functions
 
 '# Invokes a function given its name and an array of arguments
@@ -107,6 +116,7 @@ On Error GoTo ErrHandler:
     gClosure = Empty
     gBufferIndex = Empty
     gPreArgs = Empty
+    gNextFn = Empty
     
     If MethodName Like BUFFER_PATTERN Then
         NonLeafInvokation MethodName, Args_
@@ -116,7 +126,7 @@ On Error GoTo ErrHandler:
     
         NonLeafInvokation MethodName, Args_
     
-        Call FnBuffer.SetClosureBufferArgs(gClosure, gBufferIndex)
+        FnBuffer.SetClosureBufferArgs gClosure, gBufferIndex
     Else
         LeafInvokation MethodName, Args_
     End If
@@ -263,6 +273,13 @@ Public Function Lambda(MethodName As Variant, _
                     Optional ClosureArgs As Variant = Empty)
     Lambda = GenerateLambdaBufferDefinition(FnBuffer.LAMBDA_METHOD, MethodName, Empty, ClosureArgs)
 End Function
+
+'# A shorter form of compose, decorate just handles one function
+Public Function Decorate(WrappingFn As String, WrappedFn As String, _
+                    Optional ClosureArgs As Variant = Empty)
+    Decorate = GenerateLambdaBufferDefinition(FnBuffer.DECORATE_METHOD, Empty, Array(WrappingFn, WrappedFn), ClosureArgs)
+End Function
+
 
 '# Builds the definition of the buffer
 Private Function GenerateBufferDefinition(BufferMethodName As String, MethodName As Variant, BufferArgs As Variant, ClosureArgs As Variant) As String

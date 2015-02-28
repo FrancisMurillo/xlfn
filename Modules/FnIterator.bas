@@ -13,6 +13,7 @@ Private Const ERR_OFFSET As Long = 2200
 
 Private Const Constant_Lambda As String = "Constant_Lambda"
 Private Const Cycle_Lambda As String = "Cycle_Lambda"
+Private Const Random_Lambda As String = "Random_Lambda"
 
 
 ' ## Iterator Functions
@@ -35,6 +36,15 @@ Public Function Iterate(IteratorFn As String, Count As Long) As Variant
         Next
         Iterate = Iterate_
     End If
+End Function
+
+
+Public Function Random(Optional Start_ As Long = 0, Optional End_ As Long = 1000, Optional Seed As Long = 0)
+    If Start_ >= End_ Then _
+        Err.Raise vbObjectError + ERR_OFFSET, ERR_SOURCE, "Random Start cannot be less than End range"
+
+    Randomize IIf(Seed = 0, Now, Seed)
+    Random = Fn.GenerateLambdaBufferDefinition(Random_Lambda, Empty, Array(Start_, End_), Empty)
 End Function
 
 '# Returns a constant value

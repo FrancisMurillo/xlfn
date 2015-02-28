@@ -13,6 +13,17 @@ Public Sub TestConstant()
         Array(Empty, Empty, Empty, Empty, Empty)
 End Sub
 
+Public Sub TestRandom()
+    Dim RStream As Variant, RVal As Variant
+    RStream = FnIterator.Iterate(FnIterator.Random(0, 10), 10)
+    
+    For Each RVal In RStream
+        VaseAssert.AssertLessThanOrEqual RVal, 10
+        VaseAssert.AssertGreaterThanOrEqual RVal, 0
+    Next
+End Sub
+
+
 Public Sub TestCycle()
     Dim Rng As Variant, CycleFn As String
     CycleFn = FnIterator.Cycle(Array())

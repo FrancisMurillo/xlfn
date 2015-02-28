@@ -194,4 +194,35 @@ Public Function TakeN(N As Long, Arr As Variant) As Variant
     TakeN = Arr_
 End Function
 
+'# This sorts an array using quicksort functionally
+'P SortOperatorFn: A comparison operator [Var,Var] -> [Bool] that is true if the left is smaller than the right
+'P                 This is basically a IsLessThan operator for ease
+Public Function Quicksort_(SortOperatorFn As String, Arr As Variant, _
+                    Optional IsReverse As Boolean = False)
+    Dim Size_ As Long
+    Size_ = ArrayUtil.Size(Arr)
+    If Size_ < 1 Then
+        Quicksort_ = Arr
+    ElseIf Size = 2 Then
+        If Fn.InvokeTwoArg(SortOperatorFn, Arr(0), Arr(1)) Then
+            Quicksort = Arr
+        Else
+            Quicksort = ArrayUtil.Reverse(Arr)
+        End If
+    Else
+        Dim Arr_ As Variant, LArr_ As Variant, RArr_ As Variant, FVal_ As Variant
+        FVal_ = ArrayUtil.First(Arr)
+        
+        LArr_ = FnArrayUtil.Quicksort_( _
+                    SortOperatorFn, Arr, IsReverse:=IsReverse)
+        RArr_ = FnArrayUtil.Quicksort_( _
+                    FnUtil.WrapNot_(SortOperatorFn), Arr, IsReverse:=IsReverse)
+                    
+        If Not IsReverse Then
+            Arr_ = FnArrayUtil.Chain(Array(LArr_, RArr_))
+        Else
+        
+        End If
+    End If
+End Function
 

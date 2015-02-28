@@ -53,6 +53,15 @@ Public Function Lambda_(Args As Variant)
     Fn.Result = Fn.Invoke(MethodName, CurArgs)
 End Function
 
+'# Decorates one function to another
+Public Function Decorate_(Args As Variant)
+    Dim MethodNames As Variant, WrappedFn As String, WrappingFn As String, CurArgs As Variant
+    MethodNames = Args(1)
+    WrappingFn = MethodNames(0)
+    WrappedFn = MethodNames(1)
+    CurArgs = Args(2)
+    Fn.Result = Fn.InvokeOneArg(WrappingFn, Fn.Invoke(WrappedFn, CurArgs))
+End Function
 
 ' ## Iterator Lambdas
 
@@ -60,6 +69,15 @@ End Function
 Private Sub Constant_Lambda(Args As Variant)
     Dim Val As Variant
     Val = Args(1)
+    Fn.Result = Val
+End Sub
+
+'# Generates random numbers
+Private Sub Random_Lambda(Args As Variant)
+    Dim Val As Long, Start_ As Long, End_ As Long
+    Start_ = Args(1)(0)
+    End_ = Args(1)(1)
+    Val = Abs(End_ - Start_) * Rnd() + Start_
     Fn.Result = Val
 End Sub
 
@@ -71,11 +89,12 @@ Private Sub Cycle_Lambda(Args As Variant)
     Arr_ = Args(1)
     
     Fn.Result = Arr_(CurIndex)
-    
-    
+        
     CurIndex = CurIndex + 1
     If CurIndex > UBound(Arr_) Then _
         CurIndex = LBound(Arr_)
     
     Fn.Closure = CurIndex
 End Sub
+
+
