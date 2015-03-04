@@ -23,7 +23,6 @@ Public Sub TestRandom()
     Next
 End Sub
 
-
 Public Sub TestCycle()
     Dim Rng As Variant, CycleFn As String
     CycleFn = FnIterator.Cycle(Array())
@@ -34,7 +33,7 @@ Public Sub TestCycle()
     
     Rng = ArrayUtil.Range(0, 10, 3)
     CycleFn = FnIterator.Cycle(Rng)
-    
+     
     VaseAssert.AssertArraysEqual _
         FnIterator.Iterate(CycleFn, 6), _
         Array(0, 3, 6, 9, 0, 3)

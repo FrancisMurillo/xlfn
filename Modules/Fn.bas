@@ -52,12 +52,17 @@ Attribute VB_Name = "Fn"
 Private Const ERR_SOURCE As String = "Fn"
 Private Const ERR_OFFSET As Long = 2000
 
-Private Const BUFFER_MODULE As String = "FnBuffer"
-Private Const BUFFER_PREFIX As String = "Buffer_"
-Private Const LAMBDA_MODULE As String = "FnLambda"
-Private Const BUFFER_PATTERN As String = BUFFER_MODULE & ".*"
-Private Const LAMBDA_PATTERN As String = LAMBDA_MODULE & ".*"
-Private Const BUFFER_METHOD_PATTERN As String = BUFFER_MODULE & "." & BUFFER_PREFIX & "*"
+' Lambda Constant
+Public Const LAMBDA_SUFFIX As String = "_Fn"
+
+' Lambda Function Name Constants
+Private Const MODULE_PREFIX As String = "Fn."
+
+Private Const CURRY_METHOD As String = MODULE_PREFIX & "Curry" & LAMBDA_SUFFIX
+Private Const COMPOSE_METHOD As String = MODULE_PREFIX & "Compose" & LAMBDA_SUFFIX
+Private Const REINVOKE_METHOD As String = MODULE_PREFIX & "Reinvoke" & LAMBDA_SUFFIX
+Private Const LAMBDA_METHOD As String = MODULE_PREFIX & "Lambda" & LAMBDA_SUFFIX
+Private Const DECORATE_METHOD As String = MODULE_PREFIX & "Decorate" & LAMBDA_SUFFIX
 
 ' ## Property
 
@@ -118,9 +123,14 @@ On Error GoTo ErrHandler:
     gPreArgs = Empty
     gNextFn = Empty
     
-    If MethodName Like BUFFER_PATTERN Then
-        NonLeafInvokation MethodName, Args_
-    ElseIf MethodName Like LAMBDA_PATTERN Then
+    If IsBufferFunctionName(MethodName) Then
+        Dim CurBufferIndex As Long, MethodParts As Variant
+        MethodParts = Split(MethodName, FnBuffer.BUFFER_MAIN_DELIMITER)
+        CurBufferIndex = CLng(MethodParts(1))
+        
+        ' Main Buffer Call
+        FnBuffer.BufferMain Args_, CurBufferIndex
+    ElseIf IsLambdaFunctionName(MethodName) Then
         gClosure = Args_(3)
         gBufferIndex = Args_(4)
     
@@ -138,6 +148,15 @@ ErrHandler:
     ElseIf Err.Number <> 0 Then
         Err.Raise vbObjectError + ERR_OFFSET, ERR_SOURCE, MethodName & " caused an error: " & Err.Description
     End If
+End Function
+
+'# Checks if it is a lambda function name
+Public Function IsLambdaFunctionName(MethodName As String) As Boolean
+    IsLambdaFunctionName = (Right(MethodName, Len(LAMBDA_SUFFIX)) = LAMBDA_SUFFIX)
+End Function
+
+Public Function IsBufferFunctionName(MethodName As String) As Boolean
+    IsBufferFunctionName = (Left(MethodName, Len(FnBuffer.BUFFER_MAIN_METHOD)) = FnBuffer.BUFFER_MAIN_METHOD)
 End Function
 
 '# Just passes the invokation
@@ -247,39 +266,80 @@ End Sub
 ' These functions combines functions basically.
 
 '# Curries functions, returns the buffer name to be used by invoke
-Public Function Curry(MethodName As String, PreArgs As Variant, _
-                    Optional ClosureArgs As Variant = Empty) As String
-    Curry = GenerateLambdaBufferDefinition(FnBuffer.CURRY_METHOD, MethodName, PreArgs, ClosureArgs)
+Public Function Curry(MethodFs As String, PreArgs As Variant) As String
+    Curry = FnBuffer.GenerateBufferLambda(CURRY_METHOD, MethodFs, PreArgs, Empty)
 End Function
+Private Sub Curry_Fn(Args As Variant)
+    Dim MethodName As String, PreArgs As Variant, CurArgs As Variant, TotalArgs As Variant
+    MethodName = Args(0)
+    PreArgs = Args(1)
+    CurArgs = Args(2)
+    TotalArgs = FnArrayUtil.Chain(Array(PreArgs, CurArgs))
+    Fn.Result = Fn.Invoke(MethodName, TotalArgs)
+End Sub
+
 
 '# Combines several functions together, think of function composition here
-Public Function Compose(MethodNames As Variant, _
-                    Optional ClosureArgs As Variant = Empty) As String
-    Compose = GenerateLambdaBufferDefinition(FnBuffer.COMPOSE_METHOD, MethodNames, Empty, ClosureArgs)
+Public Function Compose(MethodNames As Variant) As String
+    Compose = FnBuffer.GenerateBufferLambda(COMPOSE_METHOD, Empty, MethodNames, Empty)
 End Function
+Private Sub Compose_Fn(Args As Variant)
+    Dim MethodNames As Variant, AccRes As Variant, MIndex As Long, InitArgs As Variant, MethodName As String
+    MethodNames = Args(1)
+    ' No Args(1) for Compose
+    InitArgs = Args(2)
+    
+    AccRes = Fn.Invoke(ArrayUtil.Last(MethodNames), InitArgs)
+    For MIndex = UBound(MethodNames) - 1 To LBound(MethodNames) Step -1
+        MethodName = MethodNames(MIndex)
+        AccRes = Fn.InvokeOneArg(MethodName, AccRes)
+    Next
+    Fn.Result = AccRes
+End Sub
 
 '# This is similar to curry but this functions more as a closure or a deferred executor
 '# This function accepts a method name given predefined arguments
 '# Primarily used to Map array of functions given arguments
 '# This gives you the ability to put the function name as the parameter
-Public Function Reinvoke(Args As Variant, _
-                    Optional ClosureArgs As Variant = Empty)
-    Reinvoke = GenerateLambdaBufferDefinition(FnBuffer.REINVOKE_METHOD, Empty, Args, ClosureArgs)
+Public Function Reinvoke(Args As Variant)
+    Reinvoke = FnBuffer.GenerateBufferLambda(REINVOKE_METHOD, Empty, Args, Empty)
 End Function
+'# (Re)invokes a function with predefined arguments
+Private Sub Reinvoke_Fn(Args As Variant)
+    Dim MethodName As String, PreArgs As Variant
+    MethodName = Args(2)(0)
+    PreArgs = Args(1)
+    
+    Fn.Result = Fn.Invoke(MethodName, PreArgs)
+End Sub
+
 
 '# Wraps a function to accept an argument array instead of a plain argument
 '# This is used basically wrapped multiple arguments to one, quite hard to explain
-Public Function Lambda(MethodName As Variant, _
+Public Function Lambda(MethodName As String, _
                     Optional ClosureArgs As Variant = Empty)
-    Lambda = GenerateLambdaBufferDefinition(FnBuffer.LAMBDA_METHOD, MethodName, Empty, ClosureArgs)
+    Lambda = FnBuffer.GenerateBufferLambda(LAMBDA_METHOD, MethodName, Empty, ClosureArgs)
 End Function
+Private Function Lambda_Fn(Args As Variant)
+    Dim MethodName As String, PreArgs As Variant, CurArgs As Variant
+    MethodName = Args(0)
+    CurArgs = Args(2)(0)
+    Fn.Result = Fn.Invoke(MethodName, CurArgs)
+End Function
+
 
 '# A shorter form of compose, decorate just handles one function
-Public Function Decorate(WrappingFn As String, WrappedFn As String, _
-                    Optional ClosureArgs As Variant = Empty)
-    Decorate = GenerateLambdaBufferDefinition(FnBuffer.DECORATE_METHOD, Empty, Array(WrappingFn, WrappedFn), ClosureArgs)
+Public Function Decorate(WrappingFn As String, WrappedFn As String)
+    Decorate = FnBuffer.GenerateBufferLambda(DECORATE_METHOD, Empty, Array(WrappingFn, WrappedFn), Empty)
 End Function
-
+Private Function Decorate_Fn(Args As Variant)
+    Dim MethodNames As Variant, WrappedFn As String, WrappingFn As String, CurArgs As Variant
+    MethodNames = Args(1)
+    WrappingFn = MethodNames(0)
+    WrappedFn = MethodNames(1)
+    CurArgs = Args(2)
+    Fn.Result = Fn.InvokeOneArg(WrappingFn, Fn.Invoke(WrappedFn, CurArgs))
+End Function
 
 '# Builds the definition of the buffer
 Private Function GenerateBufferDefinition(BufferMethodName As String, MethodName As Variant, BufferArgs As Variant, ClosureArgs As Variant) As String
@@ -291,24 +351,3 @@ Private Function GenerateBufferDefinition(BufferMethodName As String, MethodName
         BIndex
     GenerateBufferDefinition = BuildBufferName(BUFFER_PREFIX) & BIndex
 End Function
-
-'# Like GenerateBufferDefinition but for Lambda pattern
-Public Function GenerateLambdaBufferDefinition(LambdaMethodName As String, MethodName As Variant, BufferArgs As Variant, ClosureArgs As Variant) As String
-    Dim BIndex As Long
-    FnBuffer.InitializeBuffers
-    BIndex = FnBuffer.GetNextBufferIndex()
-    FnBuffer.SetBuffer Array( _
-        BuildLambdaBufferName(LambdaMethodName), MethodName, BufferArgs, ClosureArgs, BIndex), _
-        BIndex
-    GenerateLambdaBufferDefinition = BuildBufferName(BUFFER_PREFIX) & BIndex
-End Function
-
-
-'# Builds the full buffer module function name for use given the module and method
-Private Function BuildBufferName(MethodName As String) As String
-    BuildBufferName = BUFFER_MODULE & "." & MethodName
-End Function
-Private Function BuildLambdaBufferName(MethodName As String) As String
-    BuildLambdaBufferName = LAMBDA_MODULE & "." & MethodName
-End Function
-

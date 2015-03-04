@@ -14,14 +14,13 @@ Attribute VB_Name = "FnBuffer"
 Private Const ERR_SOURCE As String = "FnBuffer"
 Private Const ERR_OFFSET As Long = 2100
 
-Private Const BUFFER_COUNT As Long = 10
+Private Const BUFFER_COUNT As Long = 100
 Public Const BUFFER_PREFIX As String = "Buffer_"
 
-Public Const CURRY_METHOD As String = "Curry_"
-Public Const COMPOSE_METHOD As String = "Compose_"
-Public Const REINVOKE_METHOD As String = "Reinvoke_"
-Public Const LAMBDA_METHOD As String = "Lambda_"
-Public Const DECORATE_METHOD As String = "Decorate_"
+
+' Main buffer constants
+Public Const BUFFER_MAIN_METHOD As String = "FnBuffer.__Buffer__"
+Public Const BUFFER_MAIN_DELIMITER As String = "-"
 
 Private gIsBufferReady As Boolean
 Private gBufferIndex As Long
@@ -65,10 +64,11 @@ End Sub
 '# Checks if the lambda functions are used before they are prepared
 Private Sub CheckIfReady()
     If Not gIsBufferReady Then _
-        Err.Raise vbObjectError + ERR_OFFSET, ERR_SOURCE, "Tried to access the buffer function manually."
+        InitializeBuffers
 End Sub
 
 Public Sub SetBuffer(Args As Variant, Index As Long)
+    CheckIfReady
     gBufferArgs(Index) = Args
 End Sub
 Public Sub SetClosureBufferArgs(BufferArgs As Variant, Index As Long)
@@ -79,95 +79,24 @@ End Sub
 '
 ' The actual buffers that pass the invokation
 
-Private Sub Buffer_0(Optional Args As Variant = Empty)
-    CheckIfReady
-    Dim BufferArgs As Variant
-    BufferArgs = gBufferArgs(0)
-    If IsMissing(Args) Then _
-        Args = ArrayUtil.CreateEmptyArray()
-    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args, BufferArgs(3), BufferArgs(4)))
+' Public Sub BufferMain(BufferFs As String, InnerFs As String, PreArgs As Variant, Args As Variant, ClosureVars As Variant)
+Public Sub BufferMain(MainArgs As Variant, BufferIndex As Long)
+    Dim BufferArgs_ As Variant
+    Dim Lambda_Fs As String, Inner_Fs As String, PreArgs As Variant, ClosureVars As Variant
+    BufferArgs_ = gBufferArgs(BufferIndex)
+    Lambda_Fs = BufferArgs_(0)
+    Inner_Fs = BufferArgs_(1)
+    PreArgs = BufferArgs_(2)
+    ClosureVars = BufferArgs_(3)
+    
+    Fn.Result = Fn.Invoke(Lambda_Fs, Array(Inner_Fs, PreArgs, MainArgs, ClosureVars, BufferIndex))
 End Sub
 
-Private Sub Buffer_1(Optional Args As Variant = Empty)
-    CheckIfReady
-    Dim BufferArgs As Variant
-    BufferArgs = gBufferArgs(1)
-    If IsMissing(Args) Then _
-        Args = ArrayUtil.CreateEmptyArray()
-    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args, BufferArgs(3), BufferArgs(4)))
-End Sub
-
-Private Sub Buffer_2(Optional Args As Variant = Empty)
-    CheckIfReady
-    Dim BufferArgs As Variant
-    BufferArgs = gBufferArgs(2)
-    If IsMissing(Args) Then _
-        Args = ArrayUtil.CreateEmptyArray()
-    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args, BufferArgs(3), BufferArgs(4)))
-End Sub
-
-Private Sub Buffer_3(Optional Args As Variant = Empty)
-    CheckIfReady
-    Dim BufferArgs As Variant
-    BufferArgs = gBufferArgs(3)
-    If IsMissing(Args) Then _
-        Args = ArrayUtil.CreateEmptyArray()
-    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args, BufferArgs(3), BufferArgs(4)))
-End Sub
-
-Private Sub Buffer_4(Optional Args As Variant = Empty)
-    CheckIfReady
-    Dim BufferArgs As Variant
-    BufferArgs = gBufferArgs(4)
-    If IsMissing(Args) Then _
-        Args = ArrayUtil.CreateEmptyArray()
-    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args, BufferArgs(3), BufferArgs(4)))
-End Sub
-
-Private Sub Buffer_5(Optional Args As Variant = Empty)
-    CheckIfReady
-    Dim BufferArgs As Variant
-    BufferArgs = gBufferArgs(5)
-    If IsMissing(Args) Then _
-        Args = ArrayUtil.CreateEmptyArray()
-    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args, BufferArgs(3), BufferArgs(4)))
-End Sub
-
-Private Sub Buffer_6(Optional Args As Variant = Empty)
-    CheckIfReady
-    Dim BufferArgs As Variant
-    BufferArgs = gBufferArgs(6)
-    If IsMissing(Args) Then _
-        Args = ArrayUtil.CreateEmptyArray()
-    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args, BufferArgs(3), BufferArgs(4)))
-End Sub
-
-Private Sub Buffer_7(Optional Args As Variant = Empty)
-    CheckIfReady
-    Dim BufferArgs As Variant
-    BufferArgs = gBufferArgs(7)
-    If IsMissing(Args) Then _
-        Args = ArrayUtil.CreateEmptyArray()
-    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args, BufferArgs(3), BufferArgs(4)))
-End Sub
-
-Private Sub Buffer_8(Optional Args As Variant = Empty)
-    CheckIfReady
-    Dim BufferArgs As Variant
-    BufferArgs = gBufferArgs(8)
-    If IsMissing(Args) Then _
-        Args = ArrayUtil.CreateEmptyArray()
-    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args, BufferArgs(3), BufferArgs(4)))
-End Sub
-
-Private Sub Buffer_9(Optional Args As Variant = Empty)
-    CheckIfReady
-    Dim BufferArgs As Variant
-    BufferArgs = gBufferArgs(9)
-    If IsMissing(Args) Then _
-        Args = ArrayUtil.CreateEmptyArray()
-    Fn.Result = Fn.Invoke(CStr(BufferArgs(0)), Array(BufferArgs(1), BufferArgs(2), Args, BufferArgs(3), BufferArgs(4)))
-End Sub
-
-
-
+'# Generates the correct buffer lambda for invokation
+Public Function GenerateBufferLambda(LambdaFs As String, InnerFs As String, PreArgs As Variant, ClosureVars As Variant) As String
+    Dim BufferFs As String, BufferIndex_ As Long
+    BufferIndex_ = GetNextBufferIndex
+    BufferFs = Join(Array(BUFFER_MAIN_METHOD, BufferIndex_), BUFFER_MAIN_DELIMITER)
+    SetBuffer Array(LambdaFs, InnerFs, PreArgs, ClosureVars), BufferIndex_
+    GenerateBufferLambda = BufferFs
+End Function
