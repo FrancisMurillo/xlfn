@@ -44,11 +44,15 @@ Public Function ShiftBase(Arr As Variant, Optional Index As Long = 0) As Variant
     
     Offset = Index - Lower
     
-    Dim Shift_ As Variant, SIndex As Long
+    Dim Shift_ As Variant, SIndex As Long, Assignee_ As Variant
     Shift_ = Array()
     ReDim Preserve Shift_((Lower + Offset) To (Upper + Offset))
     For SIndex = LBound(Shift_) To UBound(Shift_)
-        Shift_(SIndex) = Arr_(SIndex - Offset)
+        If IsObject(Arr_(SIndex - Offset)) Then
+            Set Shift_(SIndex) = Arr_(SIndex - Offset)
+        Else
+            Shift_(SIndex) = Arr_(SIndex - Offset)
+        End If
     Next
     
     'ReDim Preserve Arr_((Lower + Offset) To (Upper + Offset))  'Shift base

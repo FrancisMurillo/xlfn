@@ -30,8 +30,8 @@ Public Function Map_(MethodName As String, Arr As Variant) As Variant
     Arr_ = ArrayUtil.CloneSize(Arr)
 
     For Index = LBound(Arr_) To UBound(Arr_)
-        Elem_ = Arr(Index)
-        Arr_(Index) = Fn.Invoke(MethodName, Array(Elem_))
+        Assign_ Elem_, Arr(Index)
+        Assign_ Arr_(Index), Fn.Invoke(MethodName, Array(Elem_))
     Next
     
     Map_ = Arr_
@@ -161,7 +161,7 @@ Public Function Chain(Arr As Variant) As Variant
     CIndex = 0
     For Each Arr_ In Arr
         For Each Elem_ In Arr_
-            CArr(CIndex) = Elem_
+            Assign_ CArr(CIndex), Elem_
             CIndex = CIndex + 1
         Next
     Next
@@ -226,3 +226,12 @@ Public Function Quicksort_(SortOperatorFn As String, Arr As Variant, _
     End If
 End Function
 
+
+' ## Utility function
+Private Sub Assign_(ByRef Assignee As Variant, ByVal Assigned As Variant)
+    If IsObject(Assigned) Then
+        Set Assignee = Assigned
+    Else
+        Assignee = Assigned
+    End If
+End Sub

@@ -86,4 +86,34 @@ Public Sub OperatorApply_(LVal As Variant, RVal As Variant, OperatorName As Stri
 End Sub
 
 
-'#
+'# Add one item to an collection
+Public Sub AddOneToCollection_(Col As Collection)
+    Col.Add 1
+    Set Fn.Result = Col
+End Sub
+
+'# Double the collection with the same elements
+Public Sub DoubleCollection_(Col As Collection)
+    Dim Col_ As New Collection, Elem As Variant
+    For Each Elem In Col
+        Col_.Add Elem
+    Next
+    ' Twice
+    For Each Elem In Col
+        Col_.Add Elem
+    Next
+    
+    Set Fn.Result = Col_
+End Sub
+
+Public Sub JoinCollection_(LCol As Collection, RCol As Collection)
+    Dim Col_ As New Collection, Elem_ As Variant
+    For Each Elem_ In LCol
+        Col_.Add Elem_
+    Next
+    For Each Elem_ In RCol
+        Col_.Add Elem_
+    Next
+    
+    Set Fn.Result = Col_
+End Sub

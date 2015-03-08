@@ -3,6 +3,15 @@ Public Sub TestInvoke()
     VaseAssert.AssertEqual _
         Fn.Invoke("FnFunction.Identity_", Array(1)), _
         1
+        
+    ' Object test
+    Dim Col As New Collection, PlusCol As New Collection
+    Col.Add 0
+    VaseAssert.AssertEqual _
+        Col.Count, 1
+    Set PlusCol = Fn.InvokeOneArg("FnTestLambda.AddOneToCollection_", Col)
+    VaseAssert.AssertEqual _
+        PlusCol.Count, 2
 End Sub
 
 Public Sub TestCurry()
@@ -33,6 +42,16 @@ Public Sub TestCurry()
     VaseAssert.AssertEqual _
         Fn.Invoke(ConstOne, Array()), _
         1
+        
+    ' Object Test
+    Dim Col As New Collection, PlusCol As New Collection, AddToColFn As String
+    Col.Add 0
+    VaseAssert.AssertEqual _
+        Col.Count, 1
+    AddToColFn = Fn.Curry("FnTestLambda.AddOneToCollection_", Array(Col))
+    Set PlusCol = Fn.InvokeNoArgs(AddToColFn)
+    VaseAssert.AssertEqual _
+        PlusCol.Count, 2
 End Sub
 
 Public Sub TestCompose()
@@ -50,6 +69,16 @@ Public Sub TestCompose()
     VaseAssert.AssertEqual _
         Fn.InvokeOneArg(ToUpperAndRemove_Fn, "Francis"), _
         "FRNCS"
+    
+    ' Object Test
+    Dim Col As New Collection, NewCol As New Collection, DoubleAndZeroFs As String
+    Col.Add 1
+    Col.Add "Two"
+    Col.Add 3#
+    DoubleAndZeroFs = Fn.Compose(Array("FnTestLambda.DoubleCollection_", "FnTestLambda.AddOneToCollection_"))
+    Set NewCol = Fn.InvokeOneArg(DoubleAndZeroFs, Col)
+    VaseAssert.AssertEqual _
+        NewCol.Count, 8
 End Sub
 
 Public Sub TestReinvoke()
@@ -67,6 +96,23 @@ Public Sub TestReinvoke()
         FnArrayUtil.Map_(WithTwoAndThree, _
             Array("FnOperator.Add_", "FnOperator.Multiply_")), _
         Array(5, 6)
+        
+    ' Object Test
+    Dim Col As New Collection, NewCol As New Collection, WithMyColFs As String, ColArr As Variant
+    Col.Add 1
+    Col.Add "Two"
+    Col.Add 3#
+    WithMyColFs = Fn.Reinvoke(Array(Col))
+    ColArr = FnArrayUtil.Map_(WithMyColFs, Array("FnTestLambda.DoubleCollection_", "FnTestLambda.AddOneToCollection_"))
+
+    VaseAssert.AssertArraySize _
+        2, ColArr
+    VaseAssert.AssertEqual _
+        6, ColArr(0).Count
+    VaseAssert.AssertEqual _
+        4, ColArr(1).Count
+        
+    Ping_
 End Sub
 
 Public Sub TestLambda()
@@ -88,6 +134,20 @@ Public Sub TestLambda()
             Array(3, 4, Fn.Compose(Array( _
                 FnFunction.Negative_Fn, FnOperator.Add_Fn))))), _
         Array(3, 6, -7)
+        
+    ' Object Test
+    Dim Col As New Collection, NewCol As New Collection, WithMyColFs As String, ColArr As Variant
+    Dim LCol As New Collection, RCol As New Collection, Arr As Variant
+    LCol.Add 1
+    LCol.Add 2
+    RCol.Add "One"
+    RCol.Add "Two"
+    ColArr = FnArrayUtil.Map_(Fn.Lambda("FnTestLambda.JoinCollection_"), Array( _
+                Array(LCol, RCol)))
+    VaseAssert.AssertArraySize _
+        1, ColArr
+    VaseAssert.AssertEqual _
+        ColArr(0).Count, 4
 End Sub
 
 Public Sub TestDecorate()

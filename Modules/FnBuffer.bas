@@ -17,7 +17,6 @@ Private Const ERR_OFFSET As Long = 2100
 Private Const BUFFER_COUNT As Long = 100
 Public Const BUFFER_PREFIX As String = "Buffer_"
 
-
 ' Main buffer constants
 Public Const BUFFER_MAIN_METHOD As String = "FnBuffer.__Buffer__"
 Public Const BUFFER_MAIN_DELIMITER As String = "-"
@@ -69,10 +68,10 @@ End Sub
 
 Public Sub SetBuffer(Args As Variant, Index As Long)
     CheckIfReady
-    gBufferArgs(Index) = Args
+    Assign_ gBufferArgs(Index), Args
 End Sub
 Public Sub SetClosureBufferArgs(BufferArgs As Variant, Index As Long)
-    gBufferArgs(Index)(3) = BufferArgs
+    Assign_ gBufferArgs(Index)(3), BufferArgs
 End Sub
 
 ' ## The Function Buffers
@@ -83,13 +82,13 @@ End Sub
 Public Sub BufferMain(MainArgs As Variant, BufferIndex As Long)
     Dim BufferArgs_ As Variant
     Dim Lambda_Fs As String, Inner_Fs As String, PreArgs As Variant, ClosureVars As Variant
-    BufferArgs_ = gBufferArgs(BufferIndex)
-    Lambda_Fs = BufferArgs_(0)
-    Inner_Fs = BufferArgs_(1)
-    PreArgs = BufferArgs_(2)
-    ClosureVars = BufferArgs_(3)
-    
-    Fn.Result = Fn.Invoke(Lambda_Fs, Array(Inner_Fs, PreArgs, MainArgs, ClosureVars, BufferIndex))
+    Assign_ BufferArgs_, gBufferArgs(BufferIndex)
+    Assign_ Lambda_Fs, BufferArgs_(0)
+    Assign_ Inner_Fs, BufferArgs_(1)
+    Assign_ PreArgs, BufferArgs_(2)
+    Assign_ ClosureVars, BufferArgs_(3)
+        
+    Assign_ Fn.Result, Fn.Invoke(Lambda_Fs, Array(Inner_Fs, PreArgs, MainArgs, ClosureVars, BufferIndex))
 End Sub
 
 '# Generates the correct buffer lambda for invokation
@@ -100,3 +99,13 @@ Public Function GenerateBufferLambda(LambdaFs As String, InnerFs As String, PreA
     SetBuffer Array(LambdaFs, InnerFs, PreArgs, ClosureVars), BufferIndex_
     GenerateBufferLambda = BufferFs
 End Function
+
+' ## Utility function
+Private Sub Assign_(ByRef Assignee As Variant, ByVal Assigned As Variant)
+    If IsObject(Assigned) Then
+        Set Assignee = Assigned
+    Else
+        Assignee = Assigned
+    End If
+End Sub
+
