@@ -20,7 +20,7 @@ Attribute VB_Name = "FnArrayUtil"
 '# This applies a new array with each element applied to a function
 'P MethodName: A function of [Var]->[Var]
 'R Retains Base
-Public Function Map_(MethodName As String, Arr As Variant) As Variant
+Public Function Map_(MethodFp As Variant, Arr As Variant) As Variant
     If ArrayUtil.IsEmptyArray(Arr) Then
         Map_ = ArrayUtil.CreateEmptyArray()
         Exit Function
@@ -31,7 +31,7 @@ Public Function Map_(MethodName As String, Arr As Variant) As Variant
 
     For Index = LBound(Arr_) To UBound(Arr_)
         Assign_ Elem_, Arr(Index)
-        Assign_ Arr_(Index), Fn.Invoke(MethodName, Array(Elem_))
+        Assign_ Arr_(Index), Fn.Invoke(MethodFp, Array(Elem_))
     Next
     
     Map_ = Arr_

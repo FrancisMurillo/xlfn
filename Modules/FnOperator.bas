@@ -15,9 +15,11 @@ Attribute VB_Name = "FnOperator"
 
 Public Const METHOD_PREFIX As String = "FnOperator."
 
-Public Const Add_Fn As String = METHOD_PREFIX & "Add_"
-Public Const Multiply_Fn As String = METHOD_PREFIX & "Multiply_"
+Public Const AddFs As String = METHOD_PREFIX & "Add_"
+Public Const MultiplyFs As String = METHOD_PREFIX & "Multiply_"
 
+Public Const OrFs As String = METHOD_PREFIX & "Or_"
+Public Const AndFs As String = METHOD_PREFIX & "And"
 
 ' ## Mathematical Operators
 '

@@ -60,17 +60,16 @@ Private Const MODULE_PREFIX As String = "Fn."
 
 Private Const CURRY_METHOD As String = MODULE_PREFIX & "Curry" & LAMBDA_SUFFIX
 Private Const COMPOSE_METHOD As String = MODULE_PREFIX & "Compose" & LAMBDA_SUFFIX
-Private Const REINVOKE_METHOD As String = MODULE_PREFIX & "Reinvoke" & LAMBDA_SUFFIX
-Private Const LAMBDA_METHOD As String = MODULE_PREFIX & "Lambda" & LAMBDA_SUFFIX
+Private Const WITH_ARGS_METHOD As String = MODULE_PREFIX & "WithArgs" & LAMBDA_SUFFIX
+Private Const UNPACK_METHOD As String = MODULE_PREFIX & "Unpack" & LAMBDA_SUFFIX
 Private Const DECORATE_METHOD As String = MODULE_PREFIX & "Decorate" & LAMBDA_SUFFIX
 
 ' ## Property
 
 Private gResult As Variant
-Private gNextFn As String
+Private gNextFp As Variant
 Private gPreArgs As Variant
 Private gClosure As Variant
-Private gBufferIndex As Long
 
 
 '# The Result property, place your result here. Write-only, that's what it's supposed to be.
@@ -97,12 +96,12 @@ End Property
 
 '# The arguments applied before the buffer function
 Public Property Get PreArgs() As Variant
-    PreArgs = gPreArgs
+    Assign_ PreArgs, gPreArgs
 End Property
 
 '# The next method to invoke if there is one
-Public Property Get NextFn() As String
-    NextFn = gNextFn
+Public Property Get NextFp() As Variant
+    Assign_ NextFp, gNextFp
 End Property
 
 ' ## Functions
@@ -116,7 +115,7 @@ End Property
 'P Args: This is the arguments for the method wrapped in an array.
 'P       This is also assumed to have base zero, but not a strict condition.
 'P       The arguments are applied by order not by index, but make my our easier by using Array() to wrap the arguments
-Public Function Invoke(MethodName As String, Args As Variant) As Variant
+Public Function Invoke(ByRef MethodFp As Variant, Args As Variant) As Variant
 On Error GoTo ErrHandler:
     Dim Args_ As Variant
     Args_ = ArrayUtil.AsNormalArray(Args)
@@ -127,23 +126,19 @@ On Error GoTo ErrHandler:
     gBufferIndex = Empty
     gPreArgs = Empty
     gNextFn = Empty
-    
-    If IsBufferFunctionName(MethodName) Then
-        Dim CurBufferIndex As Long, MethodParts As Variant
-        MethodParts = Split(MethodName, FnBuffer.BUFFER_MAIN_DELIMITER)
-        CurBufferIndex = CLng(MethodParts(1))
+            
+    If IsCompositeFunction(MethodFp) Then
+        Dim LambdaFs As String, Closure As Variant
+        LambdaFs = MethodFp(0)
+        Assign_ gNextFp, MethodFp(1)
+        Assign_ gPreArgs, MethodFp(2)
+        Assign_ gClosure, MethodFp(3)
         
-        ' Main Buffer Call
-        FnBuffer.BufferMain Args_, CurBufferIndex
-    ElseIf IsLambdaFunctionName(MethodName) Then
-        Assign_ gClosure, Args_(3)
-        Assign_ gBufferIndex, Args_(4)
-    
-        NonLeafInvokation MethodName, Args_
-    
-        FnBuffer.SetClosureBufferArgs gClosure, gBufferIndex
+        NonLeafInvokation LambdaFs, Args_
+        
+        Assign_ MethodFp(3), gClosure
     Else
-        LeafInvokation MethodName, Args_
+        LeafInvokation CStr(MethodFp), Args_
     End If
     
     Assign_ Invoke, gResult
@@ -163,6 +158,22 @@ End Function
 Public Function IsBufferFunctionName(MethodName As String) As Boolean
     IsBufferFunctionName = (Left(MethodName, Len(FnBuffer.BUFFER_MAIN_METHOD)) = FnBuffer.BUFFER_MAIN_METHOD)
 End Function
+
+'# Checks if the array
+Public Function IsCompositeFunction(Fc As Variant)
+    IsCompositeFunction = False
+    If IsArray(Fc) Then
+        If UBound(Fc) = 3 Then
+            IsCompositeFunction = True
+        End If
+    End If
+End Function
+
+'# Creates the pseudo lambda definition
+Public Function CreateLambda(LambdaFs As String, InnerFp As Variant, PreArgs As Variant, ClosureVars As Variant) As Variant
+    CreateLambda = Array(LambdaFs, InnerFp, PreArgs, ClosureVars)
+End Function
+
 
 '# Just passes the invokation
 Public Sub NonLeafInvokation(MethodName As String, Args As Variant)
@@ -247,18 +258,18 @@ Public Sub LeafInvokation(MethodName As String, Args As Variant)
 End Sub
 
 '# Invokes a method without arguments
-Public Function InvokeNoArgs(MethodName As String)
-    Assign_ InvokeNoArgs, Invoke(MethodName, Array())
+Public Function InvokeNoArgs(MethodFp As Variant)
+    Assign_ InvokeNoArgs, Invoke(MethodFp, Array())
 End Function
 
 '# Invokes a method with one argument
-Public Function InvokeOneArg(MethodName As String, Arg As Variant)
-    Assign_ InvokeOneArg, Invoke(MethodName, Array(Arg))
+Public Function InvokeOneArg(MethodFp As Variant, Arg As Variant)
+    Assign_ InvokeOneArg, Invoke(MethodFp, Array(Arg))
 End Function
 
 '# Invokes a method with two arguments
-Public Function InvokeTwoArg(MethodName As String, Arg1 As Variant, Arg2 As Variant)
-    Assign_ InvokeTwoArg, Invoke(MethodName, Array(Arg1, Arg2))
+Public Function InvokeTwoArg(MethodFp As Variant, Arg1 As Variant, Arg2 As Variant)
+    Assign_ InvokeTwoArg, Invoke(MethodFp, Array(Arg1, Arg2))
 End Function
 
 '# Just a function to easily test the installation of Fn
@@ -271,77 +282,70 @@ End Sub
 ' These functions combines functions basically.
 
 '# Curries functions, returns the buffer name to be used by invoke
-Public Function Curry(MethodFs As String, PreArgs As Variant) As String
-    Curry = FnBuffer.GenerateBufferLambda(CURRY_METHOD, MethodFs, PreArgs, Empty)
+Public Function Curry(MethodFp As Variant, PreArgs As Variant) As Variant
+    Curry = CreateLambda(CURRY_METHOD, MethodFp, PreArgs, Empty)
 End Function
-Private Sub Curry_Fn(Args As Variant)
-    Dim MethodName As String, PreArgs As Variant, CurArgs As Variant, TotalArgs As Variant
-    Assign_ MethodName, Args(0)
-    Assign_ PreArgs, Args(1)
-    Assign_ CurArgs, Args(2)
-    Assign_ TotalArgs, FnArrayUtil.Chain(Array(PreArgs, CurArgs))
-    Assign_ Fn.Result, Fn.Invoke(MethodName, TotalArgs)
+Private Sub Curry_Fn(Optional Args As Variant = Empty)
+    If IsMissing(Args) Then _
+        Args = ArrayUtil.CreateEmptyArray()
+    AssignResult_ Fn.Invoke(Fn.NextFp, ArrayUtil.JoinArrays(Fn.PreArgs, Args))
 End Sub
 
 '# Combines several functions together, think of function composition here
-Public Function Compose(MethodNames As Variant) As String
-    Compose = FnBuffer.GenerateBufferLambda(COMPOSE_METHOD, Empty, MethodNames, Empty)
+Public Function Compose(MethodFps As Variant) As Variant
+    Compose = CreateLambda(COMPOSE_METHOD, Empty, MethodFps, Empty)
+    'Compose = FnBuffer.GenerateBufferLambda(COMPOSE_METHOD, Empty, MethodNames, Empty)
 End Function
-Private Sub Compose_Fn(Args As Variant)
-    Dim MethodNames As Variant, AccRes As Variant, MIndex As Long, InitArgs As Variant, MethodName As String
-    Assign_ MethodNames, Args(1)
-    ' No Args(1) for Compose
-    Assign_ InitArgs, Args(2)
-    
-    Assign_ AccRes, Fn.Invoke(ArrayUtil.Last(MethodNames), InitArgs)
-    For MIndex = UBound(MethodNames) - 1 To LBound(MethodNames) Step -1
-        MethodName = MethodNames(MIndex)
-        Assign_ AccRes, Fn.InvokeOneArg(MethodName, AccRes)
+Private Sub Compose_Fn(Optional Args As Variant = Empty)
+    If IsMissing(Args) Then _
+        Args = ArrayUtil.CreateEmptyArray()
+            
+    Dim MethodFps As Variant, AccRes As Variant, MIndex As Long, InitArgs As Variant, MethodFp As Variant
+    MethodFps = Fn.PreArgs
+    Assign_ AccRes, Fn.Invoke(ArrayUtil.Last(MethodFps), Args)
+    For MIndex = UBound(MethodFps) - 1 To LBound(MethodFps) Step -1
+        MethodFp = MethodFps(MIndex)
+        Assign_ AccRes, Fn.InvokeOneArg(MethodFp, AccRes)
     Next
-    Assign_ Fn.Result, AccRes
+    AssignResult_ AccRes
 End Sub
 
 '# This is similar to curry but this functions more as a closure or a deferred executor
 '# This function accepts a method name given predefined arguments
 '# Primarily used to Map array of functions given arguments
 '# This gives you the ability to put the function name as the parameter
-Public Function Reinvoke(Args As Variant)
-    Reinvoke = FnBuffer.GenerateBufferLambda(REINVOKE_METHOD, Empty, Args, Empty)
+Public Function WithArgs(Args As Variant) As Variant
+    WithArgs = CreateLambda(WITH_ARGS_METHOD, Empty, Args, Empty)
 End Function
 '# (Re)invokes a function with predefined arguments
-Private Sub Reinvoke_Fn(Args As Variant)
-    Dim MethodName As String, PreArgs As Variant
-    Assign_ MethodName, Args(2)(0)
-    Assign_ PreArgs, Args(1)
-    
-    Assign_ Fn.Result, Fn.Invoke(MethodName, PreArgs)
+Private Sub WithArgs_Fn(Args As Variant)
+    Dim MethodFp As Variant
+    Assign_ MethodFp, Args(0)
+    AssignResult_ Fn.Invoke(MethodFp, Fn.PreArgs)
 End Sub
 
 
 '# Wraps a function to accept an argument array instead of a plain argument
 '# This is used basically wrapped multiple arguments to one, quite hard to explain
-Public Function Lambda(MethodName As String)
-    Lambda = FnBuffer.GenerateBufferLambda(LAMBDA_METHOD, MethodName, Empty, Empty)
+Public Function Unpack(MethodFp As Variant) As Variant
+    Unpack = CreateLambda(UNPACK_METHOD, MethodFp, Empty, Empty)
 End Function
-Private Function Lambda_Fn(Args As Variant)
-    Dim MethodName As String, PreArgs As Variant, CurArgs As Variant
-    Assign_ MethodName, Args(0)
-    Assign_ CurArgs, Args(2)(0)
-    Assign_ Fn.Result, Fn.Invoke(MethodName, CurArgs)
+Private Function Unpack_Fn(Args As Variant)
+    AssignResult_ Fn.Invoke(Fn.NextFp, Args(0))
 End Function
 
 '# A shorter form of compose, decorate just handles one function
-Public Function Decorate(WrappingFn As String, WrappedFn As String)
-    Decorate = FnBuffer.GenerateBufferLambda(DECORATE_METHOD, Empty, Array(WrappingFn, WrappedFn), Empty)
+Public Function Decorate(WrappingFp As Variant, WrappedFp As Variant)
+    Decorate = CreateLambda(DECORATE_METHOD, Empty, Array(WrappingFp, WrappedFp), Empty)
 End Function
 Private Function Decorate_Fn(Args As Variant)
-    Dim MethodNames As Variant, WrappedFn As String, WrappingFn As String, CurArgs As Variant
-    Assign_ MethodNames, Args(1)
-    Assign_ WrappingFn, MethodNames(0)
-    Assign_ WrappedFn, MethodNames(1)
-    Assign_ CurArgs, Args(2)
-    Assign_ Fn.Result, Fn.InvokeOneArg(WrappingFn, Fn.Invoke(WrappedFn, CurArgs))
+    Dim WrappedFp As String, WrappingFp As String
+    Assign_ WrappingFp, Fn.PreArgs(0)
+    Assign_ WrappedFp, Fn.PreArgs(1)
+    AssignResult_ Fn.InvokeOneArg(WrappingFp, Fn.Invoke(WrappedFp, Args))
 End Function
+
+
 
 ' ## Utility function
 Private Sub Assign_(ByRef Assignee As Variant, ByVal Assigned As Variant)
@@ -352,3 +356,10 @@ Private Sub Assign_(ByRef Assignee As Variant, ByVal Assigned As Variant)
     End If
 End Sub
 
+'# A set of generic assignment that supports objects and values without SET keyword
+Public Sub AssignResult_(ByVal Assigned As Variant)
+    Assign_ gResult, Assigned
+End Sub
+Public Sub AssignClosure_(ByVal Assigned As Variant)
+    Assign_ gClosure, Assigned
+End Sub

@@ -26,74 +26,81 @@ Private Const CYCLE_METHOD As String = MODULE_PREFIX & "Cycle" & Fn.LAMBDA_SUFFI
 ' ## Iterator Functions
 
 '# An alias to geet the next value for an iterator
-Public Function Next_(IteratorFn As String) As Variant
-    Next_ = Fn.InvokeNoArgs(IteratorFn)
+Public Function Next_(IteratorFp As Variant) As Variant
+    Assign_ Next_, Fn.InvokeNoArgs(IteratorFp)
 End Function
 
 '# Returns an array representing the number of times an iterator is repeated
 'R Zero Base
-Public Function Iterate(IteratorFn As String, Count As Long) As Variant
+Public Function Iterate(IteratorFp As Variant, Count As Long) As Variant
     If Count <= 0 Then
         Iterate = Array()
     Else
         Dim Iterate_ As Variant, Index As Long
         Iterate_ = ArrayUtil.CreateWithSize(Count)
         For Index = LBound(Iterate_) To UBound(Iterate_)
-            Iterate_(Index) = Next_(IteratorFn)
+            Assign_ Iterate_(Index), Next_(IteratorFp)
         Next
         Iterate = Iterate_
     End If
 End Function
 
-
-Public Function Random(Optional Start_ As Long = 0, Optional End_ As Long = 1000, Optional Seed As Long = 0)
+Public Function Random(Optional Start_ As Long = 0, Optional End_ As Long = 1000, Optional Seed As Long = 0) As Variant
     If Start_ >= End_ Then _
         Err.Raise vbObjectError + ERR_OFFSET, ERR_SOURCE, "Random Start cannot be less than End range"
 
     Randomize IIf(Seed = 0, Now, Seed)
-    Random = FnBuffer.GenerateBufferLambda(RANDOM_METHOD, Empty, Array(Start_, End_), Empty)
+    Random = Fn.CreateLambda(RANDOM_METHOD, Empty, Array(Start_, End_), Empty)
 End Function
-Private Sub Random_Fn(Args As Variant)
+Private Sub Random_Fn(Optional Args As Variant = Empty)
     Dim Val As Long, Start_ As Long, End_ As Long
-    Start_ = Args(1)(0)
-    End_ = Args(1)(1)
+    Start_ = Fn.PreArgs(0)
+    End_ = Fn.PreArgs(1)
     Val = Abs(End_ - Start_) * Rnd() + Start_
-    Fn.Result = Val
+    Fn.AssignResult_ Val
 End Sub
 
 '# Returns a constant value
-Public Function Constant(Val As Variant) As String
-    Constant = FnBuffer.GenerateBufferLambda(CONSTANT_METHOD, Empty, Val, Empty)
+Public Function Constant(Val As Variant) As Variant
+    Constant = Fn.CreateLambda(CONSTANT_METHOD, Empty, Val, Empty)
 End Function
-Private Sub Constant_Fn(Args As Variant)
+Private Sub Constant_Fn(Optional Args As Variant = Empty)
     Dim Val As Variant
-    Val = Args(1)
-    Fn.Result = Val
+    Assign_ Val, Fn.PreArgs
+    Fn.AssignResult_ Val
 End Sub
 
 
 '# Returns a function string that loops through an array ad infinitum
 '# If Arr is empty, this defaults to constat Empty
-Public Function Cycle(Arr As Variant) As String
+Public Function Cycle(Arr As Variant) As Variant
     If ArrayUtil.IsEmptyArray(Arr) Then
         Cycle = Constant(Empty)
     Else
-        Cycle = FnBuffer.GenerateBufferLambda(CYCLE_METHOD, Empty, Arr, LBound(Arr))
+        Cycle = Fn.CreateLambda(CYCLE_METHOD, Empty, Arr, LBound(Arr))
     End If
 End Function
-Private Sub Cycle_Fn(Args As Variant)
+Private Sub Cycle_Fn(Optional Args As Variant = Empty)
     Dim BufferIndex As Long, CurIndex As Long, Arr_ As Variant
     CurIndex = Fn.Closure
-    Arr_ = Args(1)
+    Assign_ Arr_, Fn.PreArgs
     
-    Fn.Result = Arr_(CurIndex)
+    Fn.AssignResult_ Arr_(CurIndex)
         
     CurIndex = CurIndex + 1
     If CurIndex > UBound(Arr_) Then _
         CurIndex = LBound(Arr_)
     
-    Fn.Closure = CurIndex
+    Fn.AssignClosure_ CurIndex
+    ' Assign_ Fn.Closure, CurIndex
 End Sub
 
 
-
+' ## Utility function
+Private Sub Assign_(ByRef Assignee As Variant, ByVal Assigned As Variant)
+    If IsObject(Assigned) Then
+        Set Assignee = Assigned
+    Else
+        Assignee = Assigned
+    End If
+End Sub

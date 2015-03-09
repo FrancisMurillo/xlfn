@@ -81,8 +81,8 @@ Public Sub ToUppercase_(Val As String)
 End Sub
 
 '# Operator and arguments
-Public Sub OperatorApply_(LVal As Variant, RVal As Variant, OperatorName As String)
-    Fn.Result = Fn.InvokeTwoArg(OperatorName, LVal, RVal)
+Public Sub OperatorApply_(LVal As Variant, RVal As Variant, OperatorFp As Variant)
+    Fn.Result = Fn.InvokeTwoArg(OperatorFp, LVal, RVal)
 End Sub
 
 
