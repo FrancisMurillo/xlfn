@@ -70,6 +70,7 @@ Private gResult As Variant
 Private gNextFp As Variant
 Private gPreArgs As Variant
 Private gClosure As Variant
+Private gThisFp As Variant
 
 
 '# The Result property, place your result here. Write-only, that's what it's supposed to be.
@@ -104,6 +105,11 @@ Public Property Get NextFp() As Variant
     Assign_ NextFp, gNextFp
 End Property
 
+'# This returns the current calling method, thus allowing recursion
+Public Property Get ThisFp() As Variant
+    Assign_ ThisFp, gThisFp
+End Property
+
 ' ## Functions
 
 '# Invokes a function given its name and an array of arguments
@@ -126,6 +132,8 @@ On Error GoTo ErrHandler:
     gBufferIndex = Empty
     gPreArgs = Empty
     gNextFn = Empty
+    
+    Assign_ gThisFp, MethodFp
             
     If IsCompositeFunction(MethodFp) Then
         Dim LambdaFs As String, Closure As Variant

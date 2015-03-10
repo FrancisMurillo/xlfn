@@ -4,8 +4,7 @@ Public Sub WriteInfo()
         "Microsoft Visual Basic for Applications Extensibility *", _
         "Microsoft Scripting Runtime")
     ChipReadInfo.Modules = Array( _
-        "Fn", "FnBuffer", _
-        "FnUtil", "FnArrayUtil", _
+        "Fn", "FnArrayUtil", "FnUtil", _
         "FnOperator", "FnFunction", "FnPredicate")
 End Sub
 

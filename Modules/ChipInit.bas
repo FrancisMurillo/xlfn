@@ -283,7 +283,7 @@ Public Function DownloadFile(Optional URL As String = REPO_URL, Optional Path As
     On Error GoTo 0
     
     WHTTP.Open "GET", URL, False
-    WHTTP.Send
+    WHTTP.sEnd
     FileData = WHTTP.responseBody
     Set WHTTP = Nothing
     
