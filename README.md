@@ -92,7 +92,7 @@ This is a <a href="https://github.com/FrancisMurillo/xlchip">chip</a> project, s
 
 Dependency
 
-- <a href="https://raw.githubusercontent.com/FrancisMurillo/xlbutil/master/Modules/ArrayUtil.bas">ArrayUtil.bas</a> - Since **xlfn** is built-on ArrayUtil, this module is it's only dependency as well as to build on the Map, Reduce and Filter using Arrays.
+- <a href="https://raw.githubusercontent.com/FrancisMurillo/xlbutil/master/Modules/ArrayUtil.bas">ArrayUtil.bas</a> - Since **xlfn** is built-on ArrayUtil, this module is it's only dependency as well as to build on the Map, Reduce and Filter using Arrays. It is recommended to get <a href="https://github.com/FrancisMurillo/xlbutil">xlbutil</a> to avoid this missing module definition
 
 Core
 
@@ -117,3 +117,68 @@ So to see if it's working, run in the Intermediate Window or what I call the *te
 ```
 
 You should see in the window output **"Hello Fn: The Pseudo Functional Programming Library for VBA"** in the intermediate window.
+
+### Composite Functions And More Functionality
+
+We can stop with just **Fn.Invoke** and be happy with **FnArrayUtil** for the three major functions but we can go deeper and get a few more pieces of the functional power. Within the bounds of VBA, they are <a href="https://en.wikipedia.org/wiki/Currying">Currying</a>, <a href="https://en.wikipedia.org/wiki/Function_composition_%28computer_science%29">Composition</a>, <a href="https://en.wikipedia.org/wiki/Closure_%28computer_programming%29">Closure</a> and probably more. If you don't know these concepts, I encourage you to check out the links.
+
+A quick sample for each major C concept.
+
+```VB.net
+' Let's call this module MyModule again for reference
+' Note: The arguments are wrapped in Array() rather than using Varargs since it complicates parameter and argument passing. 
+
+Public Sub Curring()
+  ' Let's curry the add operator
+  Dim AddTwoFp as Variant
+  AddTwoFp = Fn.Curry("MyModule.Add_", Array(2))
+  Debug.Print Fn.InvokeOneArg(AddTwoFp, 1) ' Outputs 3
+  Debug.Print Fn.InvokeTwoArgs("MyModule.Add_", 2, 1) ' Like above
+  
+  Dim AddTwoAndThreeFp as Variant
+  AddTwoAndThreeFp = Fn.Curry(AddTwoFp, Array(3)) 
+  ' OR AddTwoAndThreeFp = Fn.Curry("MyModule.Add_", Array(2, 3)) 
+  Debug.Print Fn.InvokeNoArg(AddTwoAndThreeFp) ' Outputs 5
+  Debug.Print Fn.InvokeTwoArgs("MyModule.Add_", 2, 3) ' Like above
+End Sub
+Public Sub Add_(LVal as Variant, RVal as Variant) 
+  Fn.Result = (LVal + RVal)
+End Sub
+
+Public Sub Composition()
+  ' Let's compose strings of functions to make this example better
+  Dim PipelineFp as Variant
+  PipelineFp = Fn.Compose(Array("MyModule.Format_", "MyModule.Negative_", "MyModule.Add_"))
+  Debug.Print Fn.InvokeTwoArgs(PipelineFp, 2, 3) ' Outputs Value: -5
+  Debug.Print Fn.InvokeOneArg(MyModule.Format_", Fn.InvokeOneArg("MyModule.Negative_", Fn.InvokeTwoArgs("MyModule.Add_", 2, 3))) ' Same as above
+  Debug.Print Composed(2, 3) ' Or simple like this defined normal function
+End Sub
+Public Sub Negative_(Val as Variant)
+  Fn.Result = -1 * Val ' For safety purposes but -Val is okay
+End Sub
+Public Sub Format_(Val as Variant)
+  Fn.Result = "Value: " & Val
+End Sub
+Public Function Composed(LVal as Variant, RVal as Variant)
+  Composed = "Value: " & (-(LVal + RVal))
+End Function
+
+Public Sub Closure()
+  ' Let's replicate a counter generator for this example
+  Dim CountFromTenFp as Variant
+  CountFromTenFp = Closure_(10)
+  
+  Debug.Print Fn.InvokeNoArgs(CountFromTenFp) ' Outputs 10
+  Debug.Print Fn.InvokeNoArgs(CountFromTenFp) ' Outputs 11
+  Debug.Print Fn.InvokeNoArgs(CountFromTenFp) ' Outputs 12
+End Sub
+Public Function Closure_(Start_ as Long) as Variant
+  Closure_ = Fn.CreateLambda("MyModule.Counter_Fn", Empty, Empty, Start_) ' This creates a function with a closure variable of Start_
+End Funciton
+Public Sub Counter_Fn(Optional Args as Variant = Empty)
+  ' Optional Args is required when defining composite functions like this which uses Closure or PreArgs although we won't be using the arguments
+  Fn.Result = Fn.Closure
+  Fn.Closure = Fn.Closure + 1
+End Sub
+```
+
