@@ -84,19 +84,26 @@ End Sub
 
 Compare the code, without using FP there would be some boilerplate just to filter a simple array although it can be still shortened. The mechanism of lambdas here are somewhat cumbersome but with the ability of **Map**, **Filter** and **Reduce** at the ready, it's a small price to pay for these three functional functions. There are others such as **ZipWith**, **Sort**, and so on just to make this worthwhile.
 
-Just a word of warning, these functions might run slower than the longer versions since there is the overhead of Application.Run as well as the transfer mechanisms involved although Python can get the same flak. But if performance is not an issue, then this library is good for you and your sanity.
+Just a word of warning, these functions might run slower than the longer versions since there is the overhead of **Application.Run** as well as the transfer mechanisms involved although Python can get the same flak. But if performance is not an issue, then this library is good for you and your sanity.
 
 ### Quick Start
 
 This is a <a href="https://github.com/FrancisMurillo/xlchip">chip</a> project, so you can download this via *Chip.ChipOnFromRepo "Fn"* or if you want to install it via importing module. Just import these four modules in your project.
 
-1. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/Fn.bas">Fn.bas</a>
-2. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnBuffer.bas">FnBuffer.bas</a>
-3. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnUtil.bas">FnArrayUtil.bas</a>
-4. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnArrayUtil.bas">FnArrayUtil.bas</a>
-5. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnPredicate.bas">FnPredicate.bas</a>
-6. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnFunction.bas">FnFunction.bas</a>
-7. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnOperator.bas">FnOperator.bas</a>
+Dependency
+
+- <a href="https://raw.githubusercontent.com/FrancisMurillo/xlbutil/master/Modules/ArrayUtil.bas">ArrayUtil.bas</a> - Since **xlfn** is built-on ArrayUtil, this module is it's only dependency as well as to build on the Map, Reduce and Filter using Arrays.
+
+Core
+
+- <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/Fn.bas">Fn.bas</a>
+- <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnArrayUtil.bas">FnArrayUtil.bas</a> - Not a true dependency but this module hosts all the core functions this module was built upon specially the promise of functional application.
+
+Optional
+
+- <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnPredicate.bas">FnPredicate.bas</a> - A set of pseudo predicate functions for common conditions
+- <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnFunction.bas">FnFunction.bas</a> - A set of pseudo functions that are useful for Map operations or whatnot
+- <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnOperator.bas">FnOperator.bas</a> - A set of pseudo operator functions or binary functions that encapsulate the common operators, useful for ZipWith like operations
 
 And include in your project references the following.
 
