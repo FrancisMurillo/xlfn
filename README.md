@@ -96,11 +96,11 @@ Dependency
 
 Core
 
-- <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/Fn.bas">Fn.bas</a>
+- <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/Fn.bas">Fn.bas</a> - The core module, this module creates and runs the pseudo functions described above via **Fn.Invoke**. Aside from the normal invokation, this allows the creation of **composite pseudo functions** that allow the functional concept of currying, closures and composition in a certain way.
 - <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnArrayUtil.bas">FnArrayUtil.bas</a> - Not a true dependency but this module hosts all the core functions this module was built upon specially the promise of functional application.
 
 Optional
-
+- <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnIterator.bas">FnIterator.bas</a> - A toy module to replicate iterators or generators from Python, it's not practical to use than a while-loop but hey it's nice to know.
 - <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnPredicate.bas">FnPredicate.bas</a> - A set of pseudo predicate functions for common conditions
 - <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnFunction.bas">FnFunction.bas</a> - A set of pseudo functions that are useful for Map operations or whatnot
 - <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnOperator.bas">FnOperator.bas</a> - A set of pseudo operator functions or binary functions that encapsulate the common operators, useful for ZipWith like operations
