@@ -182,3 +182,18 @@ Public Sub Counter_Fn(Optional Args as Variant = Empty)
 End Sub
 ```
 
+So if that small snippet got you interested, let's talk about the mechanics of Composite Functions with the making of **Fn.Curry**.
+
+So with **Fn.Invoke** setup, I wanted to curry a function, this means a function taking a function and an array of arguments and returning a function when invoked appends the preset arguments to the current arguments thus currying. Initially, the invokation mechanism only supported strings so there was a design concession of **FnBuffer** which is limited in scope and now removed. The final design solution was to allow a fake function pointer in the form of a four element array which can carry preset arguments 
+
+
+
+Starting with the **Fn.Invoke**'s variant parameter **MethodFp**, this parameter is either a module method string that can be run by the canonical **Application.Run** or a pseudo functional pointer variant array that holds function data.
+The distinction between the two is defining **Pure/Leaf Functions** which just do what they are intended and **Composite Functions**
+
+The pseudo pointer which is suffixed by **Fp**( as in Function Pointer) is simply designed as a sort of composite function or function that can call other functions such as currying by  . The function pointer array is simple an four element array which holds the following:
+
+- **MethodFp** - The actual method to be invoked
+- **NextFp** - 
+- **PreArgs**
+- **ClosureVars**
