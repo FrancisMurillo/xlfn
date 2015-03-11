@@ -84,19 +84,26 @@ End Sub
 
 Compare the code, without using FP there would be some boilerplate just to filter a simple array although it can be still shortened. The mechanism of lambdas here are somewhat cumbersome but with the ability of **Map**, **Filter** and **Reduce** at the ready, it's a small price to pay for these three functional functions. There are others such as **ZipWith**, **Sort**, and so on just to make this worthwhile.
 
-Just a word of warning, these functions might run slower than the longer versions since there is the overhead of Application.Run as well as the transfer mechanisms involved although Python can get the same flak. But if performance is not an issue, then this library is good for you and your sanity.
+Just a word of warning, these functions might run slower than the longer versions since there is the overhead of **Application.Run** as well as the transfer mechanisms involved although Python can get the same flak. But if performance is not an issue, then this library is good for you and your sanity.
 
 ### Quick Start
 
 This is a <a href="https://github.com/FrancisMurillo/xlchip">chip</a> project, so you can download this via *Chip.ChipOnFromRepo "Fn"* or if you want to install it via importing module. Just import these four modules in your project.
 
-1. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/Fn.bas">Fn.bas</a>
-2. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnBuffer.bas">FnBuffer.bas</a>
-3. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnUtil.bas">FnArrayUtil.bas</a>
-4. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnArrayUtil.bas">FnArrayUtil.bas</a>
-5. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnPredicate.bas">FnPredicate.bas</a>
-6. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnFunction.bas">FnFunction.bas</a>
-7. <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnOperator.bas">FnOperator.bas</a>
+Dependency
+
+- <a href="https://raw.githubusercontent.com/FrancisMurillo/xlbutil/master/Modules/ArrayUtil.bas">ArrayUtil.bas</a> - Since **xlfn** is built-on ArrayUtil, this module is it's only dependency as well as to build on the Map, Reduce and Filter using Arrays. It is recommended to get <a href="https://github.com/FrancisMurillo/xlbutil">xlbutil</a> to avoid this missing module definition
+
+Core
+
+- <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/Fn.bas">Fn.bas</a> - The core module, this module creates and runs the pseudo functions described above via **Fn.Invoke**. Aside from the normal invokation, this allows the creation of **composite pseudo functions** that allow the functional concept of currying, closures and composition in a certain way.
+- <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnArrayUtil.bas">FnArrayUtil.bas</a> - Not a true dependency but this module hosts all the core functions this module was built upon specially the promise of functional application.
+
+Optional
+- <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnIterator.bas">FnIterator.bas</a> - A toy module to replicate iterators or generators from Python, it's not practical to use than a while-loop but hey it's nice to know.
+- <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnPredicate.bas">FnPredicate.bas</a> - A set of pseudo predicate functions for common conditions
+- <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnFunction.bas">FnFunction.bas</a> - A set of pseudo functions that are useful for Map operations or whatnot
+- <a href="https://raw.githubusercontent.com/FrancisMurillo/xlfn/master/Modules/FnOperator.bas">FnOperator.bas</a> - A set of pseudo operator functions or binary functions that encapsulate the common operators, useful for ZipWith like operations
 
 And include in your project references the following.
 
@@ -110,3 +117,83 @@ So to see if it's working, run in the Intermediate Window or what I call the *te
 ```
 
 You should see in the window output **"Hello Fn: The Pseudo Functional Programming Library for VBA"** in the intermediate window.
+
+### Composite Functions And More Functionality
+
+We can stop with just **Fn.Invoke** and be happy with **FnArrayUtil** for the three major functions but we can go deeper and get a few more pieces of the functional power. Within the bounds of VBA, they are <a href="https://en.wikipedia.org/wiki/Currying">Currying</a>, <a href="https://en.wikipedia.org/wiki/Function_composition_%28computer_science%29">Composition</a>, <a href="https://en.wikipedia.org/wiki/Closure_%28computer_programming%29">Closure</a> and probably more. If you don't know these concepts, I encourage you to check out the links.
+
+A quick sample for each major C concept.
+
+```VB.net
+' Let's call this module MyModule again for reference
+' Note: The arguments are wrapped in Array() rather than using Varargs since it complicates parameter and argument passing. 
+
+Public Sub Curring()
+  ' Let's curry the add operator
+  Dim AddTwoFp as Variant
+  AddTwoFp = Fn.Curry("MyModule.Add_", Array(2))
+  Debug.Print Fn.InvokeOneArg(AddTwoFp, 1) ' Outputs 3
+  Debug.Print Fn.InvokeTwoArgs("MyModule.Add_", 2, 1) ' Like above
+  
+  Dim AddTwoAndThreeFp as Variant
+  AddTwoAndThreeFp = Fn.Curry(AddTwoFp, Array(3)) 
+  ' OR AddTwoAndThreeFp = Fn.Curry("MyModule.Add_", Array(2, 3)) 
+  Debug.Print Fn.InvokeNoArg(AddTwoAndThreeFp) ' Outputs 5
+  Debug.Print Fn.InvokeTwoArgs("MyModule.Add_", 2, 3) ' Like above
+End Sub
+Public Sub Add_(LVal as Variant, RVal as Variant) 
+  Fn.Result = (LVal + RVal)
+End Sub
+
+Public Sub Composition()
+  ' Let's compose strings of functions to make this example better
+  Dim PipelineFp as Variant
+  PipelineFp = Fn.Compose(Array("MyModule.Format_", "MyModule.Negative_", "MyModule.Add_"))
+  Debug.Print Fn.InvokeTwoArgs(PipelineFp, 2, 3) ' Outputs Value: -5
+  Debug.Print Fn.InvokeOneArg(MyModule.Format_", Fn.InvokeOneArg("MyModule.Negative_", Fn.InvokeTwoArgs("MyModule.Add_", 2, 3))) ' Same as above
+  Debug.Print Composed(2, 3) ' Or simple like this defined normal function
+End Sub
+Public Sub Negative_(Val as Variant)
+  Fn.Result = -1 * Val ' For safety purposes but -Val is okay
+End Sub
+Public Sub Format_(Val as Variant)
+  Fn.Result = "Value: " & Val
+End Sub
+Public Function Composed(LVal as Variant, RVal as Variant)
+  Composed = "Value: " & (-(LVal + RVal))
+End Function
+
+Public Sub Closure()
+  ' Let's replicate a counter generator for this example
+  Dim CountFromTenFp as Variant
+  CountFromTenFp = Closure_(10)
+  
+  Debug.Print Fn.InvokeNoArgs(CountFromTenFp) ' Outputs 10
+  Debug.Print Fn.InvokeNoArgs(CountFromTenFp) ' Outputs 11
+  Debug.Print Fn.InvokeNoArgs(CountFromTenFp) ' Outputs 12
+End Sub
+Public Function Closure_(Start_ as Long) as Variant
+  Closure_ = Fn.CreateLambda("MyModule.Counter_Fn", Empty, Empty, Start_) ' This creates a function with a closure variable of Start_
+End Funciton
+Public Sub Counter_Fn(Optional Args as Variant = Empty)
+  ' Optional Args is required when defining composite functions like this which uses Closure or PreArgs although we won't be using the arguments
+  Fn.Result = Fn.Closure
+  Fn.Closure = Fn.Closure + 1
+End Sub
+```
+
+So if that small snippet got you interested, let's talk about the mechanics of Composite Functions with the making of **Fn.Curry**.
+
+So with **Fn.Invoke** setup, I wanted to curry a function, this means a function taking a function and an array of arguments and returning a function when invoked appends the preset arguments to the current arguments thus currying. Initially, the invokation mechanism only supported strings so there was a design concession of **FnBuffer** which is limited in scope and now removed. The final design solution was to allow a fake function pointer in the form of a four element array which can carry preset arguments 
+
+
+
+Starting with the **Fn.Invoke**'s variant parameter **MethodFp**, this parameter is either a module method string that can be run by the canonical **Application.Run** or a pseudo functional pointer variant array that holds function data.
+The distinction between the two is defining **Pure/Leaf Functions** which just do what they are intended and **Composite Functions**
+
+The pseudo pointer which is suffixed by **Fp**( as in Function Pointer) is simply designed as a sort of composite function or function that can call other functions such as currying by  . The function pointer array is simple an four element array which holds the following:
+
+- **MethodFp** - The actual method to be invoked
+- **NextFp** - 
+- **PreArgs**
+- **ClosureVars**
