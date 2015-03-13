@@ -175,7 +175,7 @@ End Sub
 Public Function Closure_(Start_ as Long) as Variant
   Closure_ = Fn.CreateLambda("MyModule.Counter_Fn", Empty, Empty, Start_) ' This creates a function with a closure variable of Start_
 End Funciton
-Public Sub Counter_Fn(Optional Args as Variant = Empty)
+Private Sub Counter_Fn(Optional Args as Variant = Empty)
   ' Optional Args is required when defining composite functions like this which uses Closure or PreArgs although we won't be using the arguments
   Fn.Result = Fn.Closure
   Fn.Closure = Fn.Closure + 1
@@ -184,16 +184,100 @@ End Sub
 
 So if that small snippet got you interested, let's talk about the mechanics of Composite Functions with the making of **Fn.Curry**.
 
-So with **Fn.Invoke** setup, I wanted to curry a function, this means a function taking a function and an array of arguments and returning a function when invoked appends the preset arguments to the current arguments thus currying. Initially, the invokation mechanism only supported strings so there was a design concession of **FnBuffer** which is limited in scope and now removed. The final design solution was to allow a fake function pointer in the form of a four element array which can carry preset arguments 
+So with **Fn.Invoke** setup, I wanted to curry a function, this means a function taking a function and an array of arguments and returning a function when invoked appends the preset arguments to the current arguments thus currying. Initially, the invokation mechanism only supported strings so there was a design concession of **FnBuffer** which is limited in scope and now removed. The final design solution was to allow a fake function pointer in the form of a four element array which can carry preset arguments and allow this function to use the preset arguments along with it's invoked arguments. This fake function is created by **Fn.CreateLambda** which accepts the preset arguments and a function name that uses these arguments; that function is what I call as a **composite function** since it's main idea is to invoke another function. Here is the code snippet for **Fn.Curry** to better explain the concept.
 
+```VB.net
+' This function sets the variables for the composite function to use
+Public Function Curry(MethodFp As Variant, PreArgs As Variant) As Variant
+  ' MethodFp is the function to be curried and PreArgs is the array of arguments to be added to the original one
+  Curry = CreateLambda(CURRY_METHOD, MethodFp, PreArgs, Empty) ' CURRY_METHOD = 'Fn.Curry_Fn'
+  ' The last Empty parameter is the ClosureVars which this function doesn't need to use
+End Function
 
+' This function defines the actual curry procedure
+' The argument chaining is done through the line ArrayUtil.JoinArrays(Fn.PreArgs, Args)
+' Note the properties Fn.NextFp and Fn.PreArgs which is MethodFp and PreArgs in the Curry definition is used here although they aren't defined locally.
+' These properties are added before the function is called so that they can be used here.
+Private Sub Curry_Fn(Optional Args As Variant = Empty)
+  ' Customary to add this check when dealing with array of arguments as the arguments itself
+  If IsMissing(Args) Then _
+    Args = ArrayUtil.CreateEmptyArray()
+  
+  ' AssignResult_ is simply Fn.Result = Fn.Invoke(Fn.NextFp, ArrayUtil.JoinArrays(Fn.PreArgs, Args)) 
+  ' except that it also works for Object assignment. Basically an utility for object assignment
+  AssignResult_ Fn.Invoke(Fn.NextFp, ArrayUtil.JoinArrays(Fn.PreArgs, Args))
+End Sub
+```
+So this how currying was achieved. First define a function that sets the preset arguments, then define the actual function which uses thes variables. The actual defining function is suffixed with **_Fn** as convention as well as the function pointer variable is suffixed with **Fp** and is of type variant. These functions created by **Fn.CreateLambda** must accept an **optional variant argument paramenter** as well for invokation safety since that function can be invoked with or without arguments, it's best to have it optional and just create a default when there is none. The function definition is expected to be **private** since it will be stored as a variable and reduces the clutter in the intellisense. Finally, one can define a private constant variable for the name of the composite function for refactoring as well as intellisense guide. 
 
-Starting with the **Fn.Invoke**'s variant parameter **MethodFp**, this parameter is either a module method string that can be run by the canonical **Application.Run** or a pseudo functional pointer variant array that holds function data.
-The distinction between the two is defining **Pure/Leaf Functions** which just do what they are intended and **Composite Functions**
+And most important of all since the function pointer is just a variant array, **avoid modifying the pointer array** since it is mutable and the function mechanism can be screwed up; however, you can modify if you know what you're doing and can provide esoteric experimentation with this mechanism. But if you're curious what the function pointer holds, these are the four element values.
 
-The pseudo pointer which is suffixed by **Fp**( as in Function Pointer) is simply designed as a sort of composite function or function that can call other functions such as currying by  . The function pointer array is simple an four element array which holds the following:
+- **MethodFp** - This is what the **Fn.Invoke** will actuall call, which is the defining function hopefully. Additionally this is also the implicit property **Fn.ThisFp** which can allow for recursive calls with **Fn.Invoke**, an example of this is defining Fibonacci with this framework.
+- **NextFp** - This is the read-only property **Fn.NextFp** which is expected to be invoked in the function
+- **PreArgs** - This is the read-only property **Fn.PreArgs** which was preset
+- **ClosureVars** - This is both a read and write property **Fn.Closure** which allows state in these functions. Checkout the **Counter_Fn** is the major example above for how to set it.
 
-- **MethodFp** - The actual method to be invoked
-- **NextFp** - 
-- **PreArgs**
-- **ClosureVars**
+One final piece of advice for this is that you should test these function first before actually using them. Since they don't that have type safety or if the functions did not use the variables or follow the framework, it's ideal to test the invokation and the return. 
+
+In summary, this mechanism allows currying, composition and closure. You can checkout the test cases or explore the library to get a better view. But if you can define the function as a **pure/leaf** function or functions that don't need **Fn.CreateLambda** to work the better. Actually, the less use of **Fn.Invoke** the better as it is faster and doesn't add debugging complexity. Just remember that statically defined functions are better than composite or pseudo function, this library just supports these operations.
+
+### Recursion And Fn.ThisFp
+
+This section describes a small snippet of how to do recursion with the pseudo functions. Let's define <a href="https://en.wikipedia.org/wiki/Fibonacci_number">Fibonacci Function</a> here.
+
+```VB.net
+' The simple definition
+' N is assumed to be non-negative
+Public Sub Fibonacci_(N as Long)
+  If N < 3 Then
+    Fn.Result = 1
+  Else
+    Fn.Result = Fn.Invoke("Fibonacci_", N - 1) + Fn.Invoke("Fibonacci_", N - 2)
+  End If
+End Sub
+```
+
+This definition is correct but the nagging part is the **"Fibonacci_"** string there. You can define a constant above to make it cleaner but is there a more exact way of defining this? Simply use **Fn.ThisFp** as seen in the correct code snippet
+
+```VB.net
+' The proper definition
+' N is assumed to be non-negative
+Public Sub Fibonacci_(N as Long)
+  If N < 3 Then
+    Fn.Result = 1
+  Else
+    ' Note Fn.ThisFp instead of "Fibonacci_"
+    Fn.Result = Fn.Invoke(Fn.ThisFp, N - 1) + Fn.Invoke(Fn.ThisFp, N - 2)
+  End If
+End Sub
+```
+
+And that's it, nothing big. It's a nice thing to see Java **this** or perhaps Python **self** as a reminder. The true technical nature of this is that it supports recursive composite functions where you just can't put the name of the current function if it contains state variable although I doubt you'll need this. To demonstrate, here is a snippet.
+
+```VB.net
+Public Sub NTimes(Fp as Variant, N as Long)
+  NTimes = Fn.CreateLambda("NTimes_Fn", Fp, Empty, N)
+End Sub
+' This can be done in a while loop but this just to demonstrate the fact.
+Private Sub NTimes_Fn(Optional Args as Variant = Empty)
+  Fn.Invoke(Fn.NextFp)
+  If Fn.Closure > 0 Then
+    ' The way to do it is to invoke it again using Fn.ThisFp, note you can't use "NTimes_Fn" in this scenario since it won't remember the counter
+    Fn.Closure = Fn.Closure - 1 ' This mutates the counter right before calling it again, be careful of StackOverflow
+    Fn.InvokeNoArgs(Fn.ThisFp)
+  End if
+End Sub
+
+Public Sub SayHello_()
+  Debug.Print "Hello there"
+End Sub
+Public Sub Main() 
+  Dim FiveTimesFp as Variant
+  FiveTimesFp = NTimes("SayHello_", 5)
+  
+  Fn.InvokeNoArgs(FiveTimesFp) ' Prints "Hello there" five times
+End Sub
+
+```
+Hopefully you won't need this. Truly just a nice syntactic property to see.
+
