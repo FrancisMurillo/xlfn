@@ -219,6 +219,14 @@ And most important of all since the function pointer is just a variant array, **
 
 One final piece of advice for this is that you should test these function first before actually using them. Since they don't that have type safety or if the functions did not use the variables or follow the framework, it's ideal to test the invokation and the return. 
 
+Here is a list of some notable **composite functions** defined in the library
+
+- **Fn.WithArgs** - This initiall takes an array of arguments, then takes an function pointer and invokes the function with the array of arguments. Kinda like curry but it is designed to work with **Fn.Map** with an array of function pointers
+- **Fn.Decorate** - A shorthand for **Fn.Composite** when just wrapping one function on another
+- **Fn.Unpack** - This simulates Python's tuple unpacking so when a function receives an array of arguments, this decoration will unpack the arguments correctly. Again this is for **Fn.Map**
+- **FnUtil.Memoize** - A simple memoize toy implementation.
+- **FnUtil.Timeit** - A decorator that times the function execution using **Timer** much like Python's timeit.
+
 In summary, this mechanism allows currying, composition and closure. You can checkout the test cases or explore the library to get a better view. But if you can define the function as a **pure/leaf** function or functions that don't need **Fn.CreateLambda** to work the better. Actually, the less use of **Fn.Invoke** the better as it is faster and doesn't add debugging complexity. Just remember that statically defined functions are better than composite or pseudo function, this library just supports these operations.
 
 ### Recursion And Fn.ThisFp
