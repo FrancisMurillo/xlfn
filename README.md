@@ -108,7 +108,7 @@ Optional
 And include in your project references the following.
 
 1. **Microsoft Visual Basic for Applications Extensibility 5.3** - Any version would do but it has been tested with version 5.3
-2. **Microsoft Scripting Runtime** - Just for compatibility sake
+2. **Microsoft Scripting Runtime** - Also make sure you enable *Trust Access to the VBA project object model* to allow this reference to work. This can be found in the *Trust Center* under *Macro Settings*
 
 So to see if it's working, run in the Intermediate Window or what I call the *terminal*.
 
